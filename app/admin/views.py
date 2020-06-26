@@ -167,8 +167,8 @@ def add_guest():
     elif request.method.lower() == "post" and edit:
         if form.validate_on_submit():
             data = form.data
-            check_guest = Guest.query.filter_by(user_name=data['name'])
-            if check_guest or check_guest.user_id != user_id:
+            check_guest = Guest.query.filter_by(user_name=data['name']).first()
+            if check_guest and check_guest.user_id != user_id:
                 flash('编辑失败')
                 return redirect(url_for("admin.add_guest"))
             ses = ['', '男', '女']
@@ -176,8 +176,7 @@ def add_guest():
                 .update({Guest.user_name: data['name'],
                          Guest.user_sex: ses[data['sex']],
                          Guest.user_phone: data['phone'],
-                         Guest.user_mail: data['email'],
-                         })
+                         Guest.user_mail: data['email']})
             db.session.commit()
             flash("编辑客户")
     return render_template("admin/add_guest.html", form=form)
