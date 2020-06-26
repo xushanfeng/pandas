@@ -198,4 +198,10 @@ function x_admin_close(){
     parent.layer.close(index);
 }
 
-
+function mesg(message) {
+    console.log('sdlfasdfjalsdjflajsdlkfajsl')
+    layer.msg(message || '添加成功!', {icon: 1, time: 3000});
+    setTimeout(function () {
+        x_admin_close();
+    }, 2000);
+}

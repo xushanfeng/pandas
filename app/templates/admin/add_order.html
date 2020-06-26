@@ -23,10 +23,12 @@
             <div class="layui-input-block">
                 {{form.description}}
             </div>
-            <button></button>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">分类</label>
+            <div id="tree" class="layui-input-inline"></div>
         </div>
         <div>
-            <a id="add" href="#">添加</a>
             {{ form.hidden_tag() }}
             {% for detail in form.data.details %}
             <div id="detail-{{ loop.index0 }}-form" class="layui-form" data-index="{{ loop.index0 }}">
@@ -44,14 +46,17 @@
     </form>
 </div>
 
-
 <script>
-    function mesg() {
-        layer.msg('添加成功!', {icon: 1, time: 1000});
-        setTimeout(function () {
-            x_admin_close();
-        }, 2000);
-    }
-
+    layui.use('tree', function() {
+        var tree = layui.tree;
+        var treeEl = tree.render({
+            elem: '#tree',
+            showCheckbox: true,
+            data: [
+                {title: 'title1', children: [{title: 'subtitle11'}, {title: 'subtitle12'}, {title: 'subtitle13'}]},
+                {title: 'title2', children: [{title: 'subtitle21'}, {title: 'subtitle22'}, {title: 'subtitle23'}]}
+            ]
+        });
+    });
 </script>
 {% endblock %}

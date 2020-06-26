@@ -14,7 +14,6 @@
 
     <xblock>
         <button class="layui-btn" onclick="x_admin_show('添加订单','{{url_for("admin.add_order")}}','1150','450')">添加订单</button>
-
     </xblock>
     <table class="layui-table">
         <thead>
@@ -62,7 +61,6 @@
             //发异步删除数据
             $.get(
                 'http://127.0.0.1:5050/admin/dellcustomer?id=' + id,
-
                 function (html) {
                     location.reload();
                 }

@@ -233,16 +233,16 @@ class GoodsTypeSearch(FlaskForm):
 class GoodsTypeForm(FlaskForm):
     id = None
     name = StringField(
-        label='请输入客户姓名',
+        label='请输入类型名称',
         validators=[
             DataRequired()
         ],
-        description="请输入客户姓名",
+        description="请输入类型名称",
         render_kw={
             "type": "text",
             "lay-verify": "required",
             "class": "layui-input",
-            "placeholder": "请输入客户姓名",
+            "placeholder": "请输入类型名称",
         }
     )
     description = StringField(
