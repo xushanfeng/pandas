@@ -167,10 +167,10 @@ def add_guest():
     elif request.method.lower() == "post" and edit:
         if form.validate_on_submit():
             data = form.data
-            names = Guest.query.filter_by(user_name=data['name']).count()
-            if names == 1:
+            check_guest = Guest.query.filter_by(user_name=data['name'])
+            if check_guest or check_guest.user_id != user_id:
                 flash('编辑失败')
-                return redirect(url_for("admin.guests"))
+                return redirect(url_for("admin.add_guest"))
             ses = ['', '男', '女']
             db.session.query(Guest).filter(Guest.user_id == user_id) \
                 .update({Guest.user_name: data['name'],
@@ -193,7 +193,7 @@ def edit_guest():
         names = Guest.query.filter_by(user_name=data['name']).count()
         if names == 1:
             flash('添加失败')
-            return redirect(url_for("admin.guest"))
+            return redirect(url_for("admin.add_guest"))
         ses = ['', '男', '女']
         guest = Guest(
             user_name=data['name'],
