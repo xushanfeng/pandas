@@ -114,6 +114,8 @@ class ResetPassword(FlaskForm):
 
 # 修改密码
 class GuestForm(FlaskForm):
+    id = None
+    edit = False
     name = StringField(
         label='请输入客户姓名',
         validators=[
@@ -127,7 +129,7 @@ class GuestForm(FlaskForm):
             "placeholder": "请输入客户姓名",
         }
     )
-    email = PasswordField(
+    email = StringField(
         label='请输入客户邮箱',
         validators=[
             DataRequired()
@@ -140,7 +142,7 @@ class GuestForm(FlaskForm):
             "lay-verify": "required",
         }
     )
-    phone = PasswordField(
+    phone = StringField(
         label='请输入客户手机号',
         validators=[
             DataRequired()
