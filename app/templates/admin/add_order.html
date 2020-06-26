@@ -29,15 +29,12 @@
             <div id="tree" class="layui-input-inline"></div>
         </div>
         <div>
-            {{ form.hidden_tag() }}
-            {% for detail in form.data.details %}
-            <div id="detail-{{ loop.index0 }}-form" class="layui-form" data-index="{{ loop.index0 }}">
-                {{ detail.type_name }}
-                {{ detail.type_item }}
-                {{ detail.price }}
-                {{ detail.unit}}
-                <a class="remove" href="#">删除</a>
-            </div>
+            {% for detail in form.details %}
+                {{ detail.g_type }}<br>
+                {{ detail.g_type_item }}<br>
+                {{ detail.price }}<br>
+                {{ detail.unit}}<br>
+            {{detail.submit}}
             {% endfor %}
         </div>
         {{form.csrf_token}}

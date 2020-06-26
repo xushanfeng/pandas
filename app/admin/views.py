@@ -328,8 +328,9 @@ def order(page=None):
 # 添加出库单
 @admin.route("/add_order/", methods=["GET", "POST"])
 def add_order():
-    """添加小类"""
+    """添加出库单"""
     form = OrderForm()
+    print(form.data)
     if form.validate_on_submit():
         data = form.data
         order_no = Order.query.filter_by(item_name=data['order_no']).count()

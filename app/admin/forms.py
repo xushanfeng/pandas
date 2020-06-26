@@ -367,7 +367,7 @@ class DetailOrderForm(FlaskForm):
     print(types)
     print(type_items)
 
-    type_name = SelectField(
+    g_type = SelectField(
         label="请选择类型",
         validators=[
             DataRequired()
@@ -380,7 +380,7 @@ class DetailOrderForm(FlaskForm):
         }
     )
 
-    type_item_name = SelectField(
+    g_type_item = SelectField(
         label="请选择类型",
         validators=[
             DataRequired()
@@ -430,6 +430,14 @@ class DetailOrderForm(FlaskForm):
             "lay-verify": "required",
             "class": "layui-input",
             "placeholder": "请输入单位",
+        }
+    )
+    submit = SubmitField(
+        "删除",
+        render_kw={
+            "class": "layui-btn",
+            "lay-filter": "subm",
+            "onclick": "mesg()"
         }
     )
 
