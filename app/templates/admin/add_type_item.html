@@ -1,0 +1,44 @@
+{% extends "admin/bases.html" %}
+
+
+{% block content %}
+
+<div class="x-body">
+    <form class="layui-form" action="" method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属类型</label>
+            <div class="layui-input-block">
+                {{form.type_name}}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">规格名称</label>
+            <div class="layui-input-block">
+                {{form.name}}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型描述</label>
+            <div class="layui-input-block">
+                {{form.description}}
+            </div>
+        </div>
+        {{form.csrf_token}}
+        {{form.submit}}
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </form>
+</div>
+
+
+<script>
+    function mesg() {
+        layer.msg('添加成功!', {icon: 1, time: 1000});
+        setTimeout(function () {
+            x_admin_close();
+        }, 2000);
+    }
+
+</script>
+{% endblock %}

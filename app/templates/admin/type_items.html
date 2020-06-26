@@ -1,0 +1,68 @@
+{% extends "admin/bases.html" %}
+{% import "admin/fy.html" as pg %}
+
+{% block content %}
+
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" method="post">
+            {{form.name}}
+            {{form.csrf_token}}
+            {{form.submit}}
+        </form>
+    </div>
+
+    <xblock>
+        <button class="layui-btn" onclick="x_admin_show('添加类型','{{url_for("admin.add_type_item")}}','1150','450')">添加类型</button>
+
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>类型规格</th>
+            <th>所属类型</th>
+            <th>描述</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in page_data.items %}
+        <tr>
+            <td>{{i.item_name}}</td>
+            <td>{{i.name}}</td>
+            <td>{{i.description}}</td>
+
+            <td class="td-manage">
+                <a title="删除" onclick="member_del(this,'{{i.id}}')" href="javascript:;">
+                    <i class="layui-icon">&#xe640;</i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {{pg.page(page_data,'admin.type_item')}}
+
+</div>
+<script>
+    function member_del(obj, id) {
+        console.log(id)
+        layer.confirm('确认要删除吗？', function (index) {
+            //发异步删除数据
+            $.get(
+                'http://127.0.0.1:5050/admin/dellcustomer?id=' + id,
+
+                function (html) {
+                    location.reload();
+                }
+            );
+            $(obj).parents("tr").remove();
+            layer.msg('已删除!', {icon: 1, time: 1000});
+        });
+    }
+
+
+</script>
+
+{% endblock %}
