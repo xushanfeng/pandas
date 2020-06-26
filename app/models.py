@@ -234,7 +234,9 @@ class OrderDetail(db.Model):
     __tablename__ = 'order_detail'
     id = db.Column(db.Integer, primary_key=True)
     type_id = db.Column(db.Integer, unique=True)
+    item_id = db.Column(db.Integer, unique=True)
     price = db.Column(db.Integer, unique=True)
+    num = db.Column(db.Integer, unique=True)
     unit = db.Column(db.String(10), unique=True)
     add_time = db.Column(db.DateTime, index=True)
     operator_id = db.Column(db.Integer)

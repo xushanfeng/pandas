@@ -53,6 +53,7 @@ def login():
             flash('Wrong verify code.')
             return redirect(url_for("admin.login"))
         session["admin"] = data['account']
+        session["admin_id"] = user.user_id
         return redirect(request.args.get("next") or url_for("admin.index"))
     return render_template("admin/login.html", form=form)
 
@@ -139,6 +140,8 @@ def add_guest():
     edit = request.args.get('edit')
     user_id = request.args.get('user_id')
     form = GuestForm()
+    print(form.data)
+    print(form.validate_on_submit())
     if not edit:
         if form.validate_on_submit():
             data = form.data
@@ -330,25 +333,48 @@ def order(page=None):
 def add_order():
     """添加出库单"""
     form = OrderForm()
-    print(form.data)
-    if form.validate_on_submit():
-        data = form.data
-        order_no = Order.query.filter_by(item_name=data['order_no']).count()
-        if order_no == 1:
-            flash('添加失败')
-            return redirect(url_for("admin.add_order"))
-        order = Order(
-            order_no=time.strftime("%y%m%d%H%M%s", time.localtime()),
-            guest_id=data['description'],
-            description=data['description'],
-            operator_id=session.get('admin'),
-        )
-        db.session.add(order)
-        for item in form.details.data:
-            new_item = OrderDetail(**item)
-            order.order_detail.append(new_item)
-        db.session.commit()
-        flash("添加小类")
+    edit = request.args.get('edit')
+    order_no = request.args.get('order_no')
+    if not edit and not order_no:
+        if form.submit.data:
+            data = form.data
+            order = Order(
+                order_no=time.strftime("%y%m%d%H%M%s", time.localtime()),
+                guest_id=data['guest_name'],
+                total=data['total'],
+                pay=data['pay'],
+                unpay=data['unpay'],
+                description=data['description'],
+                operator_id=session.get('admin_id'),
+            )
+            db.session.add(order)
+            for item in form.details.data:
+                detail = {}
+                detail['type_id'] = item.pop('type_id')
+                detail['item_id'] = item.pop('item_id')
+                detail['price'] = item.pop('price')
+                detail['num'] = item.pop('num')
+                detail['unit'] = item.pop('unit')
+                new_item = OrderDetail(**detail)
+                order.order_detail.append(new_item)
+            db.session.commit()
+            flash("添加小类")
+    elif edit and request.method.lower() == 'get':
+        order_base = db.session.query(Order, Guest) \
+            .join(Guest, Order.guest_id == Guest.user_id).filter(Order.order_no == order_no).first()
+        if not order_base:
+            return render_template("admin/add_order.html", form=form)
+
+        details = db.session.query(GoodsType.id, TypeItem.id, OrderDetail.price, OrderDetail.num, OrderDetail.unit) \
+            .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
+            .join(TypeItem, TypeItem.id == OrderDetail.item_id).filter(order_base[0].id == OrderDetail.order_id).all()
+        print(details)
+        form = OrderForm(guest_name=order_base[1].user_id,
+                         description=order_base[0].description,
+                         total=order_base[0].total,
+                         pay=order_base[0].pay,
+                         unpay=order_base[0].unpay,
+                         details=details)
     return render_template("admin/add_order.html", form=form)
 
 

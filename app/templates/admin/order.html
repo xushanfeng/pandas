@@ -19,9 +19,9 @@
         <thead>
         <tr>
             <th>订单号</th>
-            <th>订单总价</th>
-            <th>已付款</th>
-            <th>未付款</th>
+            <th>订单总价(元)</th>
+            <th>已付款(元)</th>
+            <th>未付款(元)</th>
             <th>备注</th>
             <th>操作</th>
         </tr>
@@ -36,10 +36,10 @@
             <td>{{i.description}}</td>
 
             <td class="td-manage">
-                <a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                <a title="详情" >
                     <i class="layui-icon">&#xe705;</i>
                 </a>
-                <a title="编辑" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                <a title="编辑" href="{{url_for('admin.add_order',edit=True, order_no=i.order_no)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
                 <a title="删除" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">

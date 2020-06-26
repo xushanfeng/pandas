@@ -364,10 +364,7 @@ class DetailOrderForm(FlaskForm):
     types = GoodsType.query.all()
     type_items = TypeItem.query.all()
 
-    print(types)
-    print(type_items)
-
-    g_type = SelectField(
+    type_id = SelectField(
         label="请选择类型",
         validators=[
             DataRequired()
@@ -380,7 +377,7 @@ class DetailOrderForm(FlaskForm):
         }
     )
 
-    g_type_item = SelectField(
+    item_id = SelectField(
         label="请选择类型",
         validators=[
             DataRequired()
@@ -432,7 +429,7 @@ class DetailOrderForm(FlaskForm):
             "placeholder": "请输入单位",
         }
     )
-    submit = SubmitField(
+    delete = SubmitField(
         "删除",
         render_kw={
             "class": "layui-btn",
@@ -451,10 +448,53 @@ class OrderForm(FlaskForm):
             DataRequired()
         ],
         coerce=int,
-        choices=[(i.user_id, i.user_name) for i in guests],
+        choices=[(0, '请选择')] + [(i.user_id, i.user_name) for i in guests],
+        default=0,
         description="选择客户",
         render_kw={
             "class": "contrller",
+        }
+    )
+
+    total = StringField(
+        label='总价',
+        validators=[
+            DataRequired()
+        ],
+        description="请输入单位",
+        render_kw={
+            "type": "text",
+            "lay-verify": "required",
+            "class": "layui-input",
+            "placeholder": "请输入单位",
+        }
+    )
+
+    pay = StringField(
+        label='已付款',
+        validators=[
+            DataRequired()
+        ],
+        description="请输入已付款金额",
+        render_kw={
+            "type": "text",
+            "lay-verify": "required",
+            "class": "layui-input",
+            "placeholder": "请输入已付款金额",
+        }
+    )
+
+    unpay = StringField(
+        label='未付款',
+        validators=[
+            DataRequired()
+        ],
+        description="请输入未付款金额",
+        render_kw={
+            "type": "text",
+            "lay-verify": "required",
+            "class": "layui-input",
+            "placeholder": "请输入未付款金额",
         }
     )
 
@@ -465,7 +505,10 @@ class OrderForm(FlaskForm):
             "type": "text",
             "class": "layui-input",
             "placeholder": "请输入描述",
-        }
+        },
+        validators=[
+            DataRequired()
+        ],
     )
 
     details = FieldList(

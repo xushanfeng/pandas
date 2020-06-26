@@ -11,7 +11,6 @@
                 {{form.guest_name}}
             </div>
         </div>
-
         <div class="layui-form-item">
             <label class="layui-form-label">描述</label>
             <div class="layui-input-block">
@@ -19,22 +18,35 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">描述</label>
+            <label class="layui-form-label">订单总价(元)</label>
             <div class="layui-input-block">
-                {{form.description}}
+                {{form.total}}
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">分类</label>
-            <div id="tree" class="layui-input-inline"></div>
+            <label class="layui-form-label">已付款(元)</label>
+            <div class="layui-input-block">
+                {{form.pay}}
+            </div>
         </div>
-        <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">已付款(元)</label>
+            <div class="layui-input-block">
+                {{form.unpay}}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-label">订单明细</div>
             {% for detail in form.details %}
-                {{ detail.g_type }}<br>
-                {{ detail.g_type_item }}<br>
-                {{ detail.price }}<br>
-                {{ detail.unit}}<br>
-            {{detail.submit}}
+            <div class="layui-col-md6">
+                类型：{{ detail.type_id }}<br>
+                规格：{{ detail.item_id }}<br>
+                单价(元)：{{ detail.price}}<br>
+                数量：{{ detail.num}}<br>
+                单位：{{ detail.unit}}
+            </div>
+            <div class="layui-col-md3" style="margin: auto"></div>
+            {{detail.csrf_token}}
             {% endfor %}
         </div>
         {{form.csrf_token}}
@@ -44,7 +56,7 @@
 </div>
 
 <script>
-    layui.use('tree', function() {
+    layui.use('tree', function () {
         var tree = layui.tree;
         var treeEl = tree.render({
             elem: '#tree',
