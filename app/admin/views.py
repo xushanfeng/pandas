@@ -362,3 +362,20 @@ def wjmm():
             db.session.flush()
         return redirect(url_for('admin.login'))
     return render_template("admin/wjmm.html", form=form)
+
+
+# 删除客户
+@admin.route("/del_guest/", methods=["GET"])
+@admin_login_req
+def del_guest():
+    guest_user_id = request.args.get('id')
+    guest = Guest.query.filter(Guest.user_id == guest_user_id).first()
+    print(guest)
+    try:
+        db.session.delete(guest)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.flush()
+        print("del error, error info:", e)
+    return "success"

@@ -33,9 +33,16 @@
             <td>{{i.description}}</td>
 
             <td class="td-manage">
-                <a title="删除" onclick="member_del(this,'{{i.id}}')" href="javascript:;">
+                <a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                    <i class="layui-icon">&#xe705;</i>
+                </a>
+                <a title="编辑" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                    <i class="layui-icon">&#xe642;</i>
+                </a>
+                <a title="删除" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
                     <i class="layui-icon">&#xe640;</i>
                 </a>
+
             </td>
         </tr>
         {% endfor %}
