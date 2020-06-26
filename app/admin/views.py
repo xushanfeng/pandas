@@ -140,8 +140,6 @@ def add_guest():
     edit = request.args.get('edit')
     user_id = request.args.get('user_id')
     form = GuestForm()
-    print(form.data)
-    print(form.validate_on_submit())
     if not edit:
         if form.validate_on_submit():
             data = form.data
@@ -216,9 +214,11 @@ def category(page=None):
     form = GoodsTypeSearch()
     page = page if page is not None else 1
     if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = GoodsType.query.order_by(GoodsType.id.desc()).paginate(page=page, per_page=PAGE_LIMIT)
+        page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).paginate(page=page,
+                                                                                                         per_page=PAGE_LIMIT)
     else:
-        page_data = GoodsType.query.order_by(GoodsType.id.desc()).filter(form.data['name'] == GoodsType.name).paginate(
+        page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).filter(
+            form.data['name'] == GoodsType.name).paginate(
             page=page, per_page=PAGE_LIMIT)
     return render_template("admin/categories.html", form=form, page_data=page_data)
 
@@ -233,17 +233,19 @@ def add_goods_type():
     if not edit:
         if form.validate_on_submit():
             data = form.data
-            names = GoodsType.query.filter_by(name=data['name']).count()
+            names = GoodsType.query.filter_by(name=data['name'], status=1).count()
             if names == 1:
                 flash('添加失败')
                 return redirect(url_for("admin.add_goods_type"))
             goods_type = GoodsType(
                 name=data['name'],
-                description=data['description']
+                description=data['description'],
+                status=1
             )
             db.session.add(goods_type)
             db.session.commit()
             flash("添加大类")
+            return redirect(url_for("admin.category", page=1))
     elif request.method.lower() == 'get' and edit:
         types = GoodsType.query.filter(GoodsType.id == type_id).first()
         if not types:
@@ -251,11 +253,12 @@ def add_goods_type():
         form = GoodsTypeForm(id=types.id,
                              name=types.name,
                              description=types.description)
+        return render_template("admin/add_goods_type.html", form=form)
     elif request.method.lower() == 'post' and edit:
         if form.validate_on_submit():
             data = form.data
             goods_type = GoodsType.query.filter_by(name=data['name']).first()
-            if goods_type and str(goods_type.user_id) != str(type_id):
+            if goods_type and str(goods_type.id) != str(type_id):
                 flash('编辑失败')
                 return redirect(url_for("admin.add_goods_type"))
             db.session.query(GoodsType).filter(GoodsType.id == type_id) \
@@ -263,6 +266,10 @@ def add_goods_type():
                          GoodsType.description: data['description']})
             db.session.commit()
             flash("编辑类型")
+            form = GoodsTypeSearch()
+            page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).paginate(page=1,
+                                                                                                             per_page=PAGE_LIMIT)
+            return render_template("admin/categories.html", form=form, page_data=page_data)
     return render_template("admin/add_goods_type.html", form=form)
 
 
@@ -273,15 +280,18 @@ def type_item(page=None):
     form = TypeItemSearch()
     page = page if page is not None else 1
     if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, GoodsType.id,
+        page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
                                      GoodsType.name) \
-            .join(GoodsType, GoodsType.id == TypeItem.goods_type_id).order_by(TypeItem.id.desc()) \
+            .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
+            .filter(TypeItem.status == 1) \
+            .order_by(TypeItem.id.desc()) \
             .paginate(page=page, per_page=PAGE_LIMIT)
 
     else:
         page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, GoodsType.name,
-                                     GoodsType.id) \
+                                     TypeItem.goods_type_id) \
             .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
+            .filter(TypeItem.status == 1) \
             .order_by(TypeItem.id.desc()) \
             .filter(form.data['name'] == TypeItem.item_name, ) \
             .paginate(page=page, per_page=PAGE_LIMIT)
@@ -292,21 +302,55 @@ def type_item(page=None):
 @admin.route("/add_type_item/", methods=["GET", "POST"])
 def add_type_item():
     """添加小类"""
+    edit = request.args.get('edit')
+    item_id = request.args.get('id')
     form = TypeItemForm()
-    if form.validate_on_submit():
-        data = form.data
-        names = TypeItem.query.filter_by(item_name=data['name']).count()
-        if names == 1:
-            flash('添加失败')
-            return redirect(url_for("admin.add_type_item"))
-        item = TypeItem(
-            item_name=data['name'],
-            goods_type_id=data['type_name'],
-            description=data['description']
-        )
-        db.session.add(item)
-        db.session.commit()
-        flash("添加小类")
+    if not edit and not item_id:
+        if form.validate_on_submit():
+            data = form.data
+            names = TypeItem.query.filter_by(item_name=data['name'], status=1).count()
+            if names == 1:
+                flash('添加失败')
+                return redirect(url_for("admin.add_type_item"))
+            item = TypeItem(
+                item_name=data['name'],
+                goods_type_id=data['type_name'],
+                description=data['description'],
+                status=1
+            )
+            db.session.add(item)
+            db.session.commit()
+            flash("添加小类")
+    elif request.method.lower() == 'get' and edit:
+        items = TypeItem.query.filter(TypeItem.id == item_id).first()
+        if not items:
+            return render_template("admin/404.html")
+        form = TypeItemForm(id=items.id,
+                            type_name=items.goods_type_id,
+                            name=items.item_name,
+                            description=items.description)
+        return render_template("admin/add_type_item.html", form=form)
+    elif request.method.lower() == 'post' and edit:
+        if form.validate_on_submit():
+            data = form.data
+            item = TypeItem.query.filter_by(item_name=data['name'], status=1).first()
+            if item and str(item.id) != str(item_id):
+                flash('编辑失败')
+                return redirect(url_for("admin.add_goods_type"))
+            db.session.query(TypeItem).filter(TypeItem.id == item_id) \
+                .update({TypeItem.item_name: data['name'],
+                         TypeItem.goods_type_id: data['type_name'],
+                         TypeItem.description: data['description']})
+            db.session.commit()
+            flash("编辑类型")
+            form = TypeItemSearch()
+            page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
+                                         GoodsType.name) \
+                .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
+                .filter(TypeItem.status == 1) \
+                .order_by(TypeItem.id.desc()) \
+                .paginate(page=1, per_page=PAGE_LIMIT)
+            return render_template("admin/type_items.html", form=form, page_data=page_data)
     return render_template("admin/add_type_item.html", form=form)
 
 
@@ -346,6 +390,7 @@ def add_order():
                 unpay=data['unpay'],
                 description=data['description'],
                 operator_id=session.get('admin_id'),
+                status=1
             )
             db.session.add(order)
             for item in form.details.data:
@@ -475,5 +520,37 @@ def del_guest():
     except Exception as e:
         db.session.rollback()
         db.session.flush()
+        print("del error, error info:", e)
+    return "success"
+
+
+# 删除类型
+@admin.route("/del_type/", methods=["GET"])
+@admin_login_req
+def del_type():
+    type_id = request.args.get('id')
+    try:
+        db.session.query(GoodsType).filter(GoodsType.id == type_id).update({GoodsType.status: 2})
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.flush()
+        db.session.close()
+        print("del error, error info:", e)
+    return "success"
+
+
+# 删除小类
+@admin.route("/del_type_item/", methods=["GET"])
+@admin_login_req
+def del_type_item():
+    item_id = request.args.get('id')
+    try:
+        db.session.query(TypeItem).filter(TypeItem.id == item_id).update({TypeItem.status: 2})
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.flush()
+        db.session.close()
         print("del error, error info:", e)
     return "success"

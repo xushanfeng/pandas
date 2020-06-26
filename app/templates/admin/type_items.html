@@ -33,13 +33,13 @@
             <td>{{i.description}}</td>
 
             <td class="td-manage">
-                <a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                <a title="详情">
                     <i class="layui-icon">&#xe705;</i>
                 </a>
-                <a title="编辑" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                <a title="编辑" href="{{url_for('admin.add_type_item', edit=True, id=i.id)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
-                <a title="删除" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
+                <a title="删除" onclick="member_del(this,'{{i.id}}')">
                     <i class="layui-icon">&#xe640;</i>
                 </a>
 
@@ -54,12 +54,11 @@
 </div>
 <script>
     function member_del(obj, id) {
-        console.log(id)
+        console.log(id);
         layer.confirm('确认要删除吗？', function (index) {
             //发异步删除数据
             $.get(
-                'http://127.0.0.1:5050/admin/dellcustomer?id=' + id,
-
+                'http://127.0.0.1:5052/admin/del_type_item?id=' + id,
                 function (html) {
                     location.reload();
                 }

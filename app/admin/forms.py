@@ -312,7 +312,7 @@ class TypeItemSearch(FlaskForm):
 # 材质类型
 class TypeItemForm(FlaskForm):
     id = None
-    good_types = GoodsType.query.all()
+    good_types = GoodsType.query.filter(GoodsType.status == 1).all()
     type_name = SelectField(
         label="请选择类型",
         validators=[
@@ -361,8 +361,8 @@ class TypeItemForm(FlaskForm):
 
 # 订单明细
 class DetailOrderForm(FlaskForm):
-    types = GoodsType.query.all()
-    type_items = TypeItem.query.all()
+    types = GoodsType.query.filter(GoodsType.status == 1).all()
+    type_items = TypeItem.query.filter(TypeItem.status == 1).all()
 
     type_id = SelectField(
         label="请选择类型",
@@ -441,7 +441,7 @@ class DetailOrderForm(FlaskForm):
 
 # 订单
 class OrderForm(FlaskForm):
-    guests = Guest.query.all()
+    guests = Guest.query.filter(Guest.status == 1).all()
     guest_name = SelectField(
         label="选择客户",
         validators=[

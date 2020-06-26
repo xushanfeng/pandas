@@ -42,9 +42,6 @@
                 <a title="编辑" href="{{url_for('admin.add_order',edit=True, order_no=i.order_no)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
-                <a title="删除" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
-                    <i class="layui-icon">&#xe640;</i>
-                </a>
             </td>
         </tr>
         {% endfor %}
@@ -55,22 +52,12 @@
 
 </div>
 <script>
-    function member_del(obj, id) {
-        console.log(id)
-        layer.confirm('确认要删除吗？', function (index) {
-            //发异步删除数据
-            $.get(
-                'http://127.0.0.1:5050/admin/dellcustomer?id=' + id,
-                function (html) {
-                    location.reload();
-                }
-            );
-            $(obj).parents("tr").remove();
-            layer.msg('已删除!', {icon: 1, time: 1000});
-        });
+    function mesg() {
+        layer.msg('搜索完成', {icon: 1, time: 10000});
+        setTimeout(function () {
+            x_admin_close();
+        }, 10000);
     }
-
-
 </script>
 
 {% endblock %}
