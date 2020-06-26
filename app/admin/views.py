@@ -110,12 +110,12 @@ def guests(page=None):
             form.data['phone'] is None or form.data['phone'] == ''):
         page_data = Guest.query.order_by(
             Guest.user_id.desc()
-        ).paginate(page=page, per_page=PAGE_LIMIT)
+        ).filter(Guest.status == 1).paginate(page=page, per_page=PAGE_LIMIT)
 
     elif (form.data['name'].strip()) and (form.data['phone'] is None or form.data['phone'] == ''):
         page_data = Guest.query.order_by(
             Guest.user_id.desc()
-        ).filter(form.data['name'] == Guest.user_name).paginate(page=page, per_page=PAGE_LIMIT)
+        ).filter(form.data['name'] == Guest.user_name, Guest.status == 1).paginate(page=page, per_page=PAGE_LIMIT)
     elif (form.data['name'] is None or form.data['name'] == '') and (
             form.data['phone'].strip()):
         page_data = Guest.query.order_by(
@@ -124,7 +124,7 @@ def guests(page=None):
     elif form.data.get('name') and form.data.get('phone'):
         page_data = Guest.query.order_by(
             Guest.user_id.desc()
-        ).filter(form.data['phone'] == Guest.user_phone, form.data['name'] == Guest.user_name).paginate(page=page,
+        ).filter(form.data['phone'] == Guest.user_phone, form.data['name'] == Guest.user_name, Guest.status == 1).paginate(page=page,
                                                                                                         per_page=PAGE_LIMIT)
     else:
         return render_template("admin/404.html")
@@ -133,7 +133,36 @@ def guests(page=None):
 
 # 添加客户
 @admin.route("/add_guest/", methods=["GET", "POST"])
-def add_guest():
+def add_guest(edit=False, user_id=None):
+    """添加客户"""
+    form = GuestForm()
+    if user_id is None:
+        if form.validate_on_submit():
+            data = form.data
+            names = Guest.query.filter_by(user_name=data['name']).count()
+            if names == 1:
+                flash('添加失败')
+                return redirect(url_for("admin.guest"))
+            ses = ['', '男', '女']
+            guest = Guest(
+                user_name=data['name'],
+                user_sex=ses[data['sex']],
+                user_phone=data['phone'],
+                user_mail=data['email']
+            )
+            db.session.add(guest)
+            db.session.commit()
+            flash("添加客户")
+    elif edit and user_id:
+        user = Guest.query.filter_by(user_id=user_id).first()
+        form.data['name'] = user.user_name
+        form.data['id'] = user.user_id
+        form.data['phone'] = user.user_phone
+    return render_template("admin/add_guest.html", form=form)
+
+# 添加客户
+@admin.route("/edit_guest/", methods=["GET", "POST"])
+def edit_guest(user_id):
     """添加客户"""
     form = GuestForm()
     if form.validate_on_submit():
@@ -257,6 +286,8 @@ def order(page=None):
 def add_order():
     """添加小类"""
     form = OrderForm()
+    print(form)
+    print(form.data)
     if form.validate_on_submit():
         data = form.data
         order_no = Order.query.filter_by(item_name=data['order_no']).count()
@@ -369,10 +400,8 @@ def wjmm():
 @admin_login_req
 def del_guest():
     guest_user_id = request.args.get('id')
-    guest = Guest.query.filter(Guest.user_id == guest_user_id).first()
-    print(guest)
     try:
-        db.session.delete(guest)
+        db.session.query(Guest).filter(Guest.user_id == guest_user_id).update({Guest.status: 2})
         db.session.commit()
     except Exception as e:
         db.session.rollback()

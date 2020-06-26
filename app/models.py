@@ -190,6 +190,7 @@ class Guest(db.Model):
     user_sex = db.Column(db.String(100))
     user_mail = db.Column(db.String(100))
     user_phone = db.Column(db.String(100))
+    status = db.Column(db.Integer)
     user_addtime = db.Column(db.DateTime, index=True)
     operator_id = db.Column(db.Integer)
     pay = db.Column(db.Integer)

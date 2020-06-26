@@ -4,7 +4,7 @@ from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAr
     IntegerField
 from wtforms.validators import DataRequired
 
-from app.models import GoodsType, Guest
+from app.models import GoodsType, Guest, TypeItem
 
 
 class Login(FlaskForm):
@@ -358,8 +358,37 @@ class TypeItemForm(FlaskForm):
 
 # 订单明细
 class DetailOrderForm(FlaskForm):
-    type_name = SelectField()
-    type_item_name = SelectField()
+    types = GoodsType.query.all()
+    type_items = TypeItem.query.all()
+
+    print(types)
+    print(type_items)
+
+    type_name = SelectField(
+        label="请选择类型",
+        validators=[
+            DataRequired()
+        ],
+        coerce=int,
+        choices=[(i.id, i.name) for i in types],
+        description="请选择类型",
+        render_kw={
+            "class": "contrller",
+        }
+    )
+
+    type_item_name = SelectField(
+        label="请选择类型",
+        validators=[
+            DataRequired()
+        ],
+        coerce=int,
+        choices=[(i.id, i.item_name) for i in type_items],
+        description="请选择类型",
+        render_kw={
+            "class": "contrller",
+        }
+    )
     price = StringField(
         label='单价',
         validators=[
