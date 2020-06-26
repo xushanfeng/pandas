@@ -38,12 +38,17 @@
         <div class="layui-form-item">
             <div class="layui-form-label">订单明细</div>
             {% for detail in form.details %}
+            <p>A value from a dictionnary:{{detail.unit}}</p>
             <div class="layui-col-md6">
                 类型：{{ detail.type_id }}<br>
                 规格：{{ detail.item_id }}<br>
                 单价(元)：{{ detail.price}}<br>
                 数量：{{ detail.num}}<br>
-                单位：{{ detail.unit}}
+<!--                {% if detail.unit == '1' %}-->
+
+<!--<p>A value from a dictionnary:{{detail.unit}}</p>-->
+<!--                长度：{{detail.length}}-->
+<!--                {% endif %}-->
             </div>
             <div class="layui-col-md3" style="margin: auto"></div>
             {{detail.csrf_token}}

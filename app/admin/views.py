@@ -12,16 +12,7 @@ from flask import render_template, make_response, session, redirect, url_for, re
 from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX
 from app.models import User, Guest, GoodsType, TypeItem, Order, OrderDetail
-
-
-def admin_login_req(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'admin' not in session:
-            return redirect(url_for("admin.login", next=request.url))
-        return f(*args, **kwargs)
-
-    return decorated_function
+from app.utils.doc import admin_login_req
 
 
 def admin_power(f):
@@ -317,6 +308,7 @@ def add_type_item():
             item = TypeItem(
                 item_name=data['name'],
                 goods_type_id=data['type_name'],
+                unit=data['unit'],
                 description=data['description'],
                 status=1
             )
@@ -330,6 +322,7 @@ def add_type_item():
         form = TypeItemForm(id=items.id,
                             type_name=items.goods_type_id,
                             name=items.item_name,
+                            unit=items.unit,
                             description=items.description)
         return render_template("admin/add_type_item.html", form=form)
     elif request.method.lower() == 'post' and edit:
@@ -342,6 +335,7 @@ def add_type_item():
             db.session.query(TypeItem).filter(TypeItem.id == item_id) \
                 .update({TypeItem.item_name: data['name'],
                          TypeItem.goods_type_id: data['type_name'],
+                         TypeItem.unit: data['unit'],
                          TypeItem.description: data['description']})
             db.session.commit()
             flash("编辑类型")
@@ -367,7 +361,7 @@ def order(page=None):
                                      Guest.user_name) \
             .join(Guest, Guest.user_id == Order.guest_id) \
             .order_by(Order.id.desc()) \
-            .paginate(page=1, per_page=PAGE_LIMIT)
+            .paginate(page=page, per_page=PAGE_LIMIT)
 
     else:
         page_data = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,
@@ -375,7 +369,7 @@ def order(page=None):
             .join(Guest, Guest.user_id == Order.guest_id) \
             .fliter(Guest.user_name == form.data.get('name')) \
             .order_by(Order.id.desc()) \
-            .paginate(page=1, per_page=PAGE_LIMIT)
+            .paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/order.html", form=form, page_data=page_data)
 
 
@@ -405,20 +399,21 @@ def add_order():
                 detail['item_id'] = item.pop('item_id')
                 detail['price'] = item.pop('price')
                 detail['num'] = item.pop('num')
-                detail['unit'] = item.pop('unit')
                 new_item = OrderDetail(**detail)
                 order.order_detail.append(new_item)
             db.session.commit()
             flash("添加小类")
     elif edit and request.method.lower() == 'get':
         order_base = db.session.query(Order, Guest) \
-            .join(Guest, Order.guest_id == Guest.user_id).filter(Order.order_no == order_no).first()
+            .join(Guest, Order.guest_id == Guest.user_id)\
+            .filter(Order.order_no == order_no).first()
         if not order_base:
             return render_template("admin/add_order.html", form=form)
 
-        details = db.session.query(GoodsType.id, TypeItem.id, OrderDetail.price, OrderDetail.num, OrderDetail.unit) \
+        details = db.session.query(GoodsType.id, TypeItem.id, OrderDetail.price, OrderDetail.num, TypeItem.unit) \
             .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
-            .join(TypeItem, TypeItem.id == OrderDetail.item_id).filter(order_base[0].id == OrderDetail.order_id).all()
+            .join(TypeItem, TypeItem.id == OrderDetail.item_id)\
+            .filter(order_base[0].id == OrderDetail.order_id).all()
         print(details)
         form = OrderForm(guest_name=order_base[1].user_id,
                          description=order_base[0].description,

@@ -1,9 +1,10 @@
 # 登陆表单
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, FieldList, FormField, \
-    IntegerField
+    IntegerField, RadioField
 from wtforms.validators import DataRequired
 
+from app.constant.const import UNIT
 from app.models import GoodsType, Guest, TypeItem
 
 
@@ -353,6 +354,19 @@ class TypeItemForm(FlaskForm):
         }
     )
 
+    unit = RadioField(
+        label="请选择单位",
+        validators=[
+            DataRequired()
+        ],
+        coerce=int,
+        choices=[(v, k) for k, v in UNIT.items()],
+        description="请选择单位",
+        render_kw={
+            "class": "contrller",
+        }
+    )
+
     description = TextAreaField(
         label='请输入类型规格描述',
         description="请输入类型规格描述",
@@ -442,6 +456,21 @@ class DetailOrderForm(FlaskForm):
             "placeholder": "请输入单位",
         }
     )
+
+    length = StringField(
+        label='长度',
+        validators=[
+            DataRequired()
+        ],
+        description="请输入长度",
+        render_kw={
+            "type": "text",
+            "lay-verify": "required",
+            "class": "layui-input",
+            "placeholder": "请输入长度",
+        }
+    )
+
     delete = SubmitField(
         "删除",
         render_kw={

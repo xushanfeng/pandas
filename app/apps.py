@@ -34,9 +34,12 @@ mail = Mail(app)
 # 注册蓝图
 from app.admin import admin as admin_blueprint
 from app.home import home as home_blueprint
+from app.interface import inter as inter_blueprint
+
 
 app.register_blueprint(admin_blueprint, url_prefix='/admin/')
 app.register_blueprint(home_blueprint, url_prefix='/')
+app.register_blueprint(inter_blueprint, url_prefix='/inter')
 
 
 @app.errorhandler(404)
