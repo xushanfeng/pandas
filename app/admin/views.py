@@ -168,7 +168,7 @@ def add_guest():
         if form.validate_on_submit():
             data = form.data
             check_guest = Guest.query.filter_by(user_name=data['name']).first()
-            if check_guest and check_guest.user_id != user_id:
+            if check_guest and str(check_guest.user_id) != str(user_id):
                 flash('编辑失败')
                 return redirect(url_for("admin.add_guest"))
             ses = ['', '男', '女']
@@ -224,20 +224,42 @@ def category(page=None):
 @admin.route("/add_goods_type/", methods=["GET", "POST"])
 def add_goods_type():
     """添加大类"""
+    type_id = request.args.get('type_id')
+    edit = request.args.get('edit')
     form = GoodsTypeForm()
-    if form.validate_on_submit():
-        data = form.data
-        names = GoodsType.query.filter_by(name=data['name']).count()
-        if names == 1:
-            flash('添加失败')
-            return redirect(url_for("admin.add_goods_type"))
-        goods_type = GoodsType(
-            name=data['name'],
-            description=data['description']
-        )
-        db.session.add(goods_type)
-        db.session.commit()
-        flash("添加大类")
+    if not edit:
+        if form.validate_on_submit():
+            data = form.data
+            names = GoodsType.query.filter_by(name=data['name']).count()
+            if names == 1:
+                flash('添加失败')
+                return redirect(url_for("admin.add_goods_type"))
+            goods_type = GoodsType(
+                name=data['name'],
+                description=data['description']
+            )
+            db.session.add(goods_type)
+            db.session.commit()
+            flash("添加大类")
+    elif request.method.lower() == 'get' and edit:
+        types = GoodsType.query.filter(GoodsType.id == type_id).first()
+        if not types:
+            return render_template("admin/404.html")
+        form = GoodsTypeForm(id=types.id,
+                             name=types.name,
+                             description=types.description)
+    elif request.method.lower() == 'post' and edit:
+        if form.validate_on_submit():
+            data = form.data
+            goods_type = GoodsType.query.filter_by(name=data['name']).first()
+            if goods_type and str(goods_type.user_id) != str(type_id):
+                flash('编辑失败')
+                return redirect(url_for("admin.add_goods_type"))
+            db.session.query(GoodsType).filter(GoodsType.id == type_id) \
+                .update({GoodsType.name: data['name'],
+                         GoodsType.description: data['description']})
+            db.session.commit()
+            flash("编辑类型")
     return render_template("admin/add_goods_type.html", form=form)
 
 

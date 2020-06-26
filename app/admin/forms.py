@@ -231,6 +231,7 @@ class GoodsTypeSearch(FlaskForm):
 
 # 材质类型
 class GoodsTypeForm(FlaskForm):
+    id = None
     name = StringField(
         label='请输入客户姓名',
         validators=[
@@ -244,7 +245,7 @@ class GoodsTypeForm(FlaskForm):
             "placeholder": "请输入客户姓名",
         }
     )
-    description = PasswordField(
+    description = StringField(
         label='请输入类型描述',
         validators=[
             DataRequired()
@@ -310,8 +311,8 @@ class TypeItemSearch(FlaskForm):
 
 # 材质类型
 class TypeItemForm(FlaskForm):
+    id = None
     good_types = GoodsType.query.all()
-    print(good_types)
     type_name = SelectField(
         label="请选择类型",
         validators=[
