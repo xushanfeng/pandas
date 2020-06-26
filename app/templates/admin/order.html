@@ -19,6 +19,7 @@
         <thead>
         <tr>
             <th>订单号</th>
+            <th>客户姓名</th>
             <th>订单总价(元)</th>
             <th>已付款(元)</th>
             <th>未付款(元)</th>
@@ -30,6 +31,7 @@
         {% for i in page_data.items %}
         <tr>
             <td>{{i.order_no}}</td>
+            <td>{{i.user_name}}</td>
             <td>{{i.total}}</td>
             <td>{{i.pay}}</td>
             <td>{{i.unpay}}</td>

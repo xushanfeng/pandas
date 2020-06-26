@@ -152,7 +152,8 @@ def add_guest():
                 user_name=data['name'],
                 user_sex=ses[data['sex']],
                 user_phone=data['phone'],
-                user_mail=data['email']
+                user_mail=data['email'],
+                addr=data['addr']
             )
             db.session.add(guest)
             db.session.commit()
@@ -164,6 +165,7 @@ def add_guest():
                          email=user.user_mail,
                          sex=SEX.get(user.user_sex),
                          id=user.user_id,
+                         addr=user.addr,
                          edit=True)
     elif request.method.lower() == "post" and edit:
         if form.validate_on_submit():
@@ -177,6 +179,7 @@ def add_guest():
                 .update({Guest.user_name: data['name'],
                          Guest.user_sex: ses[data['sex']],
                          Guest.user_phone: data['phone'],
+                         Guest.addr: data['addr'],
                          Guest.user_mail: data['email']})
             db.session.commit()
             flash("编辑客户")
@@ -360,14 +363,19 @@ def order(page=None):
     form = OrderSearch()
     page = page if page is not None else 1
     if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = Order.query \
-            .paginate(page=page, per_page=PAGE_LIMIT)
+        page_data = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,
+                                     Guest.user_name) \
+            .join(Guest, Guest.user_id == Order.guest_id) \
+            .order_by(Order.id.desc()) \
+            .paginate(page=1, per_page=PAGE_LIMIT)
 
     else:
-        page_data = Order.query \
+        page_data = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,
+                                     Guest.user_name) \
+            .join(Guest, Guest.user_id == Order.guest_id) \
+            .fliter(Guest.user_name == form.data.get('name')) \
             .order_by(Order.id.desc()) \
-            .filter(form.data['order_no'] == Order.order_no, ) \
-            .paginate(page=page, per_page=PAGE_LIMIT)
+            .paginate(page=1, per_page=PAGE_LIMIT)
     return render_template("admin/order.html", form=form, page_data=page_data)
 
 

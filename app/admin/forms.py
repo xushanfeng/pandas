@@ -142,6 +142,19 @@ class GuestForm(FlaskForm):
             "lay-verify": "required",
         }
     )
+    addr = StringField(
+        label='请输入客户地区',
+        validators=[
+            DataRequired()
+        ],
+        description="请输入客户地区",
+        render_kw={
+            "type": "text",
+            "class": "layui-input",
+            "placeholder": "请输入客户地区",
+            "lay-verify": "required",
+        }
+    )
     phone = StringField(
         label='请输入客户手机号',
         validators=[

@@ -8,7 +8,7 @@
         <form class="layui-form layui-col-md12 x-so" method="post">
             {{form.name}}
             {{form.phone}}
-
+            {{form.addr}}
             {{form.csrf_token}}
             {{form.submit}}
         </form>
@@ -16,13 +16,13 @@
 
     <xblock>
         <button class="layui-btn" onclick="x_admin_show('添加客户','{{url_for("admin.add_guest")}}','1150','450')">添加客户</button>
-
     </xblock>
     <table class="layui-table">
         <thead>
         <tr>
             <th>客户姓名</th>
             <th>手机号码</th>
+            <th>地区</th>
             <th>操作</th>
         </tr>
         </thead>
@@ -31,10 +31,8 @@
         <tr>
             <td>{{i.user_name}}</td>
             <td>{{i.user_phone}}</td>
+            <td>{{i.addr}}</td>
             <td class="td-manage">
-                <!--<a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
-                    <i class="layui-icon">&#xe705;</i>
-                </a>-->
                 <a title="编辑" href="{{url_for('admin.add_guest', edit=True, user_id=i.user_id)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>

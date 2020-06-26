@@ -28,6 +28,7 @@ class Guest(db.Model):
     user_name = db.Column(db.String(100), unique=True)
     user_sex = db.Column(db.String(100))
     user_mail = db.Column(db.String(100))
+    addr = db.Column(db.String(100))
     user_phone = db.Column(db.String(100))
     status = db.Column(db.Integer)
     user_addtime = db.Column(db.DateTime, default=datetime.datetime.now, index=True)
