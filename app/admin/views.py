@@ -239,8 +239,7 @@ def add_goods_type():
                 return redirect(url_for("admin.add_goods_type"))
             goods_type = GoodsType(
                 name=data['name'],
-                description=data['description'],
-                status=1
+                description=data['description']
             )
             db.session.add(goods_type)
             db.session.commit()
@@ -389,8 +388,7 @@ def add_order():
                 pay=data['pay'],
                 unpay=data['unpay'],
                 description=data['description'],
-                operator_id=session.get('admin_id'),
-                status=1
+                operator_id=session.get('admin_id')
             )
             db.session.add(order)
             for item in form.details.data:
