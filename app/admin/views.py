@@ -23,7 +23,6 @@ def admin_login_req(f):
 
     return decorated_function
 
-
 def admin_power(f):
     @wraps(f)
     def admin_function(*args, **kwargs):
@@ -124,9 +123,7 @@ def guests(page=None):
     elif form.data.get('name') and form.data.get('phone'):
         page_data = Guest.query.order_by(
             Guest.user_id.desc()
-        ).filter(form.data['phone'] == Guest.user_phone, form.data['name'] == Guest.user_name,
-                 Guest.status == 1).paginate(page=page,
-                                             per_page=PAGE_LIMIT)
+        ).filter(form.data['phone'] == Guest.user_phone, form.data['name'] == Guest.user_name, Guest.status == 1).paginate(page=page, per_page=PAGE_LIMIT)
     else:
         return render_template("admin/404.html")
     return render_template("admin/guests.html", form=form, page_data=page_data)
@@ -225,21 +222,30 @@ def category(page=None):
 def add_goods_type():
     """添加大类"""
     form = GoodsTypeForm()
-    if form.validate_on_submit():
-        data = form.data
-        names = GoodsType.query.filter_by(name=data['name']).count()
-        if names == 1:
-            flash('添加失败')
-            return redirect(url_for("admin.add_goods_type"))
-        goods_type = GoodsType(
-            name=data['name'],
-            description=data['description']
+    id = request.args.get('id')
+    if(id is None):
+        if form.validate_on_submit():
+            data = form.data
+            names = GoodsType.query.filter_by(name=data['name']).count()
+            if names == 1:
+                flash('添加失败')
+                return redirect(url_for("admin.add_goods_type"))
+            goods_type = GoodsType(
+                name=data['name'],
+                description=data['description']
+            )
+            db.session.add(goods_type)
+            db.session.commit()
+            flash("添加大类")
+    else:
+        goods_type = GoodsType.query.filter_by(id=id).first()
+        print(goods_type.description)
+        form = GoodsTypeForm(
+            name=goods_type.name,
+            description=goods_type.description,
         )
-        db.session.add(goods_type)
-        db.session.commit()
-        flash("添加大类")
+        
     return render_template("admin/add_goods_type.html", form=form)
-
 
 # 材质小类
 @admin.route("/type_item/<int:page>", methods=["GET", "POST"])

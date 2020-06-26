@@ -232,19 +232,19 @@ class GoodsTypeSearch(FlaskForm):
 # 材质类型
 class GoodsTypeForm(FlaskForm):
     name = StringField(
-        label='请输入客户姓名',
+        label='请输入类型名称',
         validators=[
             DataRequired()
         ],
-        description="请输入客户姓名",
+        description="请输入类型名称",
         render_kw={
             "type": "text",
             "lay-verify": "required",
             "class": "layui-input",
-            "placeholder": "请输入客户姓名",
+            "placeholder": "请输入类型名称",
         }
     )
-    description = PasswordField(
+    description = StringField(
         label='请输入类型描述',
         validators=[
             DataRequired()
