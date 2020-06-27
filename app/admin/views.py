@@ -1,17 +1,15 @@
-import time
 from functools import wraps
 from io import BytesIO
-from flask_mail import Message
 from werkzeug.security import generate_password_hash
 
 from app.admin.forms import Login, ResetPassword, GuestForm, GuestSearch, GoodsTypeSearch, GoodsTypeForm, \
-    TypeItemSearch, TypeItemForm, OrderSearch, OrderForm
-from app.apps import db, mail
+    TypeItemSearch, TypeItemForm, OrderSearch
+from app.apps import db
 from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
 from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX
-from app.models import User, Guest, GoodsType, TypeItem, Order, OrderDetail
+from app.models import User, Guest, GoodsType, TypeItem, Order
 from app.utils.doc import admin_login_req
 
 
@@ -69,29 +67,14 @@ def code():
 def guests(page=None):
     form = GuestSearch()
     page = page if page is not None else 1
-    if (form.data['name'] is None or form.data['name'] == '') and (
-            form.data['phone'] is None or form.data['phone'] == ''):
-        page_data = Guest.query.order_by(
-            Guest.user_id.desc()
-        ).filter(Guest.status == 1).paginate(page=page, per_page=PAGE_LIMIT)
-
-    elif (form.data['name'].strip()) and (form.data['phone'] is None or form.data['phone'] == ''):
-        page_data = Guest.query.order_by(
-            Guest.user_id.desc()
-        ).filter(form.data['name'] == Guest.user_name, Guest.status == 1).paginate(page=page, per_page=PAGE_LIMIT)
-    elif (form.data['name'] is None or form.data['name'] == '') and (
-            form.data['phone'].strip()):
-        page_data = Guest.query.order_by(
-            Guest.user_id.desc()
-        ).filter(form.data['phone'] == Guest.user_phone).paginate(page=page, per_page=PAGE_LIMIT)
-    elif form.data.get('name') and form.data.get('phone'):
-        page_data = Guest.query.order_by(
-            Guest.user_id.desc()
-        ).filter(form.data['phone'] == Guest.user_phone, form.data['name'] == Guest.user_name,
-                 Guest.status == 1).paginate(page=page,
-                                             per_page=PAGE_LIMIT)
-    else:
-        return render_template("admin/404.html")
+    guest_query = Guest.query.order_by(Guest.user_id.desc()).filter(Guest.status == 1)
+    name = str(form.data.get('name')).strip() if form.data.get('name') else None
+    phone = str(form.data.get('phone')).strip() if form.data.get('phone') else None
+    if name:
+        guest_query = guest_query.filter(Guest.user_name.like('%{}%'.format(name)))
+    if form.data.get('phone'):
+        guest_query = guest_query.filter(Guest.user_phone.like('%{}%'.format(phone)))
+    page_data = guest_query.filter().paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/guests.html", form=form, page_data=page_data)
 
 
@@ -148,43 +131,17 @@ def add_guest():
     return render_template("admin/add_guest.html", form=form)
 
 
-# 添加客户
-@admin.route("/edit_guest/", methods=["GET", "POST"])
-def edit_guest():
-    """添加客户"""
-    form = GuestForm()
-    if form.validate_on_submit():
-        data = form.data
-        names = Guest.query.filter_by(user_name=data['name']).count()
-        if names == 1:
-            flash('添加失败')
-            return redirect(url_for("admin.add_guest"))
-        ses = ['', '男', '女']
-        guest = Guest(
-            user_name=data['name'],
-            user_sex=ses[data['sex']],
-            user_phone=data['phone'],
-            user_mail=data['email']
-        )
-        db.session.add(guest)
-        db.session.commit()
-        flash("添加客户")
-    return render_template("admin/add_guest.html", form=form)
-
-
 # 材质管理
 @admin.route("/category/<int:page>", methods=["GET", "POST"])
 @admin_login_req
 def category(page=None):
     form = GoodsTypeSearch()
     page = page if page is not None else 1
-    if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).paginate(page=page,
-                                                                                                         per_page=PAGE_LIMIT)
-    else:
-        page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).filter(
-            form.data['name'] == GoodsType.name).paginate(
-            page=page, per_page=PAGE_LIMIT)
+    name = str(form.data.get('name')).strip() if form.data.get('name') else None
+    goods_type_query = GoodsType.query.order_by(GoodsType.id.desc()).filter(GoodsType.status == 1)
+    if name:
+        goods_type_query = goods_type_query.filter(GoodsType.name.like('%{}%'.format(name)))
+    page_data = goods_type_query.paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/categories.html", form=form, page_data=page_data)
 
 
@@ -243,22 +200,13 @@ def add_goods_type():
 def type_item(page=None):
     form = TypeItemSearch()
     page = page if page is not None else 1
-    if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
-                                     GoodsType.name) \
-            .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
-            .filter(TypeItem.status == 1) \
-            .order_by(TypeItem.id.desc()) \
-            .paginate(page=page, per_page=PAGE_LIMIT)
-
-    else:
-        page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, GoodsType.name,
-                                     TypeItem.goods_type_id) \
-            .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
-            .filter(TypeItem.status == 1) \
-            .order_by(TypeItem.id.desc()) \
-            .filter(form.data['name'] == TypeItem.item_name, ) \
-            .paginate(page=page, per_page=PAGE_LIMIT)
+    name = str(form.data.get('name')) if form.data.get('name') else None
+    item_query = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
+                                  GoodsType.name).join(GoodsType, GoodsType.id == TypeItem.goods_type_id)
+    if name:
+        item_query = item_query.filter(TypeItem.item_name.like('%{}%'.format(name)))
+    page_data = item_query.filter(TypeItem.status == 1).order_by(TypeItem.id.desc()).paginate(page=page,
+                                                                                              per_page=PAGE_LIMIT)
     return render_template("admin/type_items.html", form=form, page_data=page_data)
 
 
@@ -327,20 +275,12 @@ def add_type_item():
 def order(page=None):
     form = OrderSearch()
     page = page if page is not None else 1
-    if form.data.get('name') is None or not str(form.data.get('name')).strip():
-        page_data = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,
-                                     Guest.user_name) \
-            .join(Guest, Guest.user_id == Order.guest_id) \
-            .order_by(Order.id.desc()) \
-            .paginate(page=page, per_page=PAGE_LIMIT)
-
-    else:
-        page_data = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,
-                                     Guest.user_name) \
-            .join(Guest, Guest.user_id == Order.guest_id) \
-            .fliter(Guest.user_name == form.data.get('name')) \
-            .order_by(Order.id.desc()) \
-            .paginate(page=page, per_page=PAGE_LIMIT)
+    name = str(form.data.get('name')).strip() if form.data.get('name') else None
+    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Guest.user_name)\
+        .join(Guest, Guest.user_id == Order.guest_id)
+    if name:
+        order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
+    page_data = order_query.order_by(Order.id.desc()).paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/order.html", form=form, page_data=page_data)
 
 
@@ -352,12 +292,6 @@ def add_order():
     typeItems = TypeItem.query.filter(GoodsType.status == 1, TypeItem.status == 1).all()
     types = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).all()
     return render_template("admin/add_order.html", guests=guests, types=types, type_items=typeItems)
-
-
-# 忘记密码路由
-@admin.route("/forgetpws/")
-def forgetpws():
-    pass
 
 
 # 首页
@@ -406,7 +340,6 @@ def person_detail():
         return 'Success'
 
     return render_template("admin/person_detail.html", form=form, usermessage=usermessage)
-
 
 
 # 删除客户
