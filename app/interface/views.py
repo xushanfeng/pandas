@@ -84,7 +84,9 @@ def add_order():
                 origin_detail_ids = [_[0] for _ in origin_details]
                 objs = list()
                 for _ in new_details:
-                    if not _.get('id') or _.get('id') not in origin_detail_ids:
+                    if not _.get('id'):
+                        fill_order_detail(order_id, _, objs)
+                    elif int(_.get('id')) not in origin_detail_ids:
                         fill_order_detail(order_id, _, objs)
                     else:
                         if _.get('status', 1) != 2:
@@ -141,8 +143,8 @@ def orders():
     }
     if details:
         items = list()
-        item = {}
         for i in details:
+            item = {}
             item['type_id'] = i[0]
             item['item_id'] = i[1]
             item['price'] = i[2]
