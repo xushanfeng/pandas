@@ -33,3 +33,21 @@ def user_statistics(guest_name=None, order_no=None, start_time=None, end_time=No
         "unpay": page_data[0][2],
         "total_order": page_data[0][3],
     }
+
+
+def compute_order_statistics(start_time=None, end_time=None):
+    end_time = end_time if end_time else time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    order_query = db.session.query(func.sum(Order.total), func.sum(Order.pay),
+                                   func.sum(Order.unpay), func.count(Order.id)) \
+        .join(Guest, Order.guest_id == Guest.user_id)
+    if end_time and start_time:
+        order_query = order_query.filter(Order.add_time < end_time, Order.add_time > start_time)
+    elif end_time:
+        order_query = order_query.filter(Order.add_time < end_time)
+    order_data = order_query.order_by(Guest.user_id.desc()).all()
+    return {
+        "total": order_data[0][0],
+        "pay": order_data[0][1],
+        "unpay": order_data[0][2],
+        "total_order": order_data[0][3],
+    }

@@ -1,14 +1,16 @@
 import datetime
 import json
+import logging
 import time
 
-from flask import request, jsonify
+from flask import request, jsonify, render_template
+from pyecharts import Page, Bar
 from sqlalchemy import func
 
 from app.apps import db
 from app.interface import inter
 from app.models import GoodsType, TypeItem, Order, OrderDetail, Guest
-from app.src.compute import user_statistics
+from app.src.compute import user_statistics, compute_order_statistics
 from app.utils.base_res import base_success_res, base_fail_res
 from app.utils.doc import admin_login_req
 
@@ -237,6 +239,16 @@ def user_pay_statistics():
     start_time = request.args.get('start_time', '')
     end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     result = user_statistics(guest_name, order_no, start_time, end_time)
+    #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
+    return jsonify(base_success_res(result)) if result.get('result_code') != 'error' else jsonify(result)
+
+
+@inter.route("/order_statistics", methods=['GET'])
+# @admin_login_req
+def order_statistics():
+    start_time = request.args.get('start_time', '')
+    end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    result = compute_order_statistics(start_time, end_time)
     #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
     return jsonify(base_success_res(result)) if result.get('result_code') != 'error' else jsonify(result)
 
