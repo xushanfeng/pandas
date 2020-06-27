@@ -3,11 +3,10 @@ import json
 import logging
 import time
 
-from flask import request, jsonify, render_template
-from pyecharts import Page, Bar
-from sqlalchemy import func
+from flask import request, jsonify
 
 from app.apps import db
+from app.data_template.data_template import print_template
 from app.interface import inter
 from app.models import GoodsType, TypeItem, Order, OrderDetail, Guest
 from app.src.compute import user_statistics, compute_order_statistics
@@ -71,16 +70,7 @@ def add_order():
                 # add
                 objs = list()
                 for _ in new_details:
-                    o = OrderDetail(
-                        order_id=order_id,
-                        type_id=_.get('type_id'),
-                        item_id=_.get('item_id'),
-                        price=_.get('price'),
-                        num=_.get('num'),
-                        lengh=_.get('length'),
-                        status=1
-                    )
-                    objs.append(o)
+                    fill_order_detail(order_id, _, objs)
                 db.session.add_all(objs)
                 db.session.commit()
 
@@ -95,16 +85,7 @@ def add_order():
                 objs = list()
                 for _ in new_details:
                     if not _.get('id') or _.get('id') not in origin_detail_ids:
-                        o = OrderDetail(
-                            order_id=order_id,
-                            type_id=_.get('type_id'),
-                            item_id=_.get('item_id'),
-                            price=_.get('price'),
-                            num=_.get('num'),
-                            lengh=_.get('length'),
-                            status=1
-                        )
-                        objs.append(o)
+                        fill_order_detail(order_id, _, objs)
                     else:
                         if _.get('status', 1) != 2:
                             db.session.query(OrderDetail) \
@@ -113,8 +94,7 @@ def add_order():
                                          OrderDetail.item_id: _.get("item_id"),
                                          OrderDetail.price: _.get("price"),
                                          OrderDetail.num: _.get("num"),
-                                         OrderDetail.lengh: _.get("length")
-                                         })
+                                         OrderDetail.lengh: _.get("length")})
                         else:
                             db.session.query(OrderDetail).filter(OrderDetail.id == _.get('id')).update(
                                 {OrderDetail.status: 2})
@@ -299,21 +279,28 @@ def order_print():
     return jsonify(base_success_res(print_info))
 
 
-def print_template():
-    return {
-        'title': '南阳恒宇彩板 岩棉复合板 单瓦 楼承板 C Z 型钢',
-        'sub_title': '黄石山力 天津新宇彩卷南阳总代理 销售出货单',
-        'connect': '南阳兴达钢材市场 电话：0377-63150159 68060601',
-        'out_date': '',
-        'out_status': '已出货',
-        'order_no': '',
-        'guest_name': '',
-        'check': '',
-        'guest_phone': '',
-        'pay': '',
-        'amount_receivable': '',
-        'discount_amount': '',
-        'details': {
+def build_new_order_details(details, order_id):
+    objs = list()
+    for _ in details:
+        o = OrderDetail(
+            order_id=order_id,
+            type_id=_.get('type_id'),
+            item_id=_.get('item_id'),
+            price=_.get('price'),
+            num=_.get('num'),
+            lengh=_.get('length'),
+            status=1)
+        objs.append(o)
+    return objs
 
-        }
-    }
+
+def fill_order_detail(order_id, item, details):
+    o = OrderDetail(
+        order_id=order_id,
+        type_id=item.get('type_id'),
+        item_id=item.get('item_id'),
+        price=item.get('price'),
+        num=item.get('num'),
+        lengh=item.get('length'),
+        status=1)
+    details.append(o)
