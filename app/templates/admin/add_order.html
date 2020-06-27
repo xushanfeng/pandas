@@ -4,73 +4,219 @@
 {% block content %}
 
 <div class="x-body">
-    <form class="layui-form" action="" method="post">
+    <form class="layui-form" action="" method="post" id="order-form">
         <div class="layui-form-item">
             <label class="layui-form-label">客户名称</label>
             <div class="layui-input-block">
-                {{form.guest_name}}
+                <select id="guest_name" name="guest_name" lay-filter="guest_name" required="">
+                    <option>请选择</option>
+                    {% for guest in guests %}
+                    <option value="{{guest.user_id}}">{{guest.user_name}}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
-        <div class="layui-form-item">
+        <!--<div class="layui-form-item">
             <label class="layui-form-label">描述</label>
             <div class="layui-input-block">
-                {{form.description}}
+                <textarea class="layui-input" id="description" name="description" placeholder="请输入描述" required="" type="text"></textarea>
             </div>
-        </div>
+        </div>-->
         <div class="layui-form-item">
             <label class="layui-form-label">订单总价(元)</label>
             <div class="layui-input-block">
-                {{form.total}}
+                <input class="layui-input" id="total" lay-verify="required" name="total" placeholder="请输入单位" required="" type="text">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">已付款(元)</label>
             <div class="layui-input-block">
-                {{form.pay}}
+                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">已付款(元)</label>
+            <label class="layui-form-label">未付款(元)</label>
             <div class="layui-input-block">
-                {{form.unpay}}
+                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="请输入未付款金额" required="" type="text" >
             </div>
         </div>
         <div class="layui-form-item">
             <div class="layui-form-label">订单明细</div>
-            {% for detail in form.details %}
-            <p>A value from a dictionnary:{{detail.unit}}</p>
-            <div class="layui-col-md6">
-                类型：{{ detail.type_id }}<br>
-                规格：{{ detail.item_id }}<br>
-                单价(元)：{{ detail.price}}<br>
-                数量：{{ detail.num}}<br>
-<!--                {% if detail.unit == '1' %}-->
-
-<!--<p>A value from a dictionnary:{{detail.unit}}</p>-->
-<!--                长度：{{detail.length}}-->
-<!--                {% endif %}-->
+            <div class="layui-input-block">
+                <table class="layui-table" id="detail">
+                    <thead>
+                        <tr>
+                            <th>分类</th>
+                            <th>规格</th>
+                            <th>价格</th>
+                            <th>数量</th>
+                            <th>单位</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <td>
+                            <select id="types" lay-filter="type_id">
+                                <option value="">请选择</options>
+                                {% for type in types %}
+                                <option value="{{type.id}}">{{type.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select id="type_items">
+                                <option value="">请选择</options>
+                                {% for type in type_items %}
+                                <option data-goods_type_id="{{type.goods_type_id}}" value="{{type.id}}">{{type.item_name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input class="layui-input" id="price" lay-verify="required" placeholder="请输入单价" required type="text">
+                        </td>
+                        <td>
+                            <input class="layui-input" id="num" lay-verify="required" placeholder="请输入数量" required type="text">
+                        </td>
+                        <td>
+                            <input class="layui-input" id="unit" lay-verify="required" placeholder="请输入单位" required type="text">
+                        </td>
+                        <td><button class="layui-btn" onclick="addItem()" type="button">添加</button></td>
+                    </tbody>
+                </table>
             </div>
-            <div class="layui-col-md3" style="margin: auto"></div>
-            {{detail.csrf_token}}
-            {% endfor %}
         </div>
-        {{form.csrf_token}}
-        {{form.submit}}
-        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        <div class="layui-form-item">
+            <div class="layui-form-label"></div>
+            <div class="layui-input-block">
+                <input class="layui-btn" id="submit" lay-filter="subm" type="button" onclick="save()" type="submit" value="保存">
+                <button type="button" onclick="goBack()" class="layui-btn layui-btn-primary">返回</button>
+            </div>
+        </div>
     </form>
 </div>
-
 <script>
-    layui.use('tree', function () {
-        var tree = layui.tree;
-        var treeEl = tree.render({
-            elem: '#tree',
-            showCheckbox: true,
-            data: [
-                {title: 'title1', children: [{title: 'subtitle11'}, {title: 'subtitle12'}, {title: 'subtitle13'}]},
-                {title: 'title2', children: [{title: 'subtitle21'}, {title: 'subtitle22'}, {title: 'subtitle23'}]}
-            ]
+
+
+layui.use('form', function() {
+    form = layui.form
+    form.on('select(type_id)', function(data) {
+        var id = $('#types').val();
+        $('#type_items option').each(function(i, el) {
+            var goods_type_id = $(el).data('goods_type_id');
+            if(goods_type_id != id) {
+                $(el).attr('disabled', true);
+            } else {
+                $(el).attr('disabled', false);
+            }
+            form.render('select');
         });
     });
+});
+
+var apis = {
+    save: '/inter/add_order',
+    detail: '/inter/orders'
+};
+
+var config = {
+    types: {
+        {% for type in types %}
+        {{type.id}}: {id: {{type.id}}, name: "{{type.name}}"},
+        {% endfor %}
+    },
+    type_items: {
+        {% for item in type_items %}
+        {{item.id}}: {id: {{item.id}}, item_name: "{{item.item_name}}", goods_type_id: {{item.goods_type_id}}, unit: "{{item.unit}}"},
+        {% endfor %}
+    }
+};
+
+var order = {
+    id: '',
+    pay: '',
+    total: '',
+    unpay: '',
+    details: [],
+    order_no: '',
+    guest_id: '',
+    guest_name: '',
+};
+
+function appendItem(data) {
+    console.log('ddd', data)
+    var str = `<tr>
+    <td>${config.types[data.item_id].name}</td>
+    <td>${data.item_name}</td>
+    <td>${data.price}</td>
+    <td>${data.num}</td>
+    <td>${data.unit}</td>
+    <td><button class="layui-btn" type="button">删除</button></td>
+    </tr`;
+    $('#detail tbody').prepend(str)
+}
+
+function initOrder(order) {
+    $('#guest_name').val(order.guest_id);
+    $('#total').val(order.total);
+    $('#pay').val(order.pay);
+    $('#unpay').val(order.unpay);
+
+    $.each(order.details, function(i, data) {
+        appendItem(data);
+    });
+
+    renderForm();
+}
+
+function addItem() {
+    var data = {};
+    data.item_id = $('#types').val();
+    data.item_name = config.type_items[$('#type_items').val()].item_name;
+    data.price = $('#price').val();
+    data.num = $('#num').val();
+    data.unit = $('#unit').val();
+    appendItem(data);
+    $('#types').val('');
+    $('#type_items').val('');
+    $('#price').val('');
+    $('#num').val('');
+    $('#unit').val('');
+    renderForm();
+}
+
+function getOrder() {
+    var params = getParams(location.search.substr(1));
+    var url;
+    if(params.order_no) {
+        url = apis.detail + '?order_no=' + params.order_no
+    } else if (params.order_id) {
+        url = apis.detail + '?order_id=' + params.order_id
+    }
+    if(url) {
+        $.get(url, function(res) {
+            if(res.result_code === 'success') {
+                order = res.data.order || order;
+                initOrder(order);
+            } else {
+                mesg(res.message || '获取订单信息失败');
+            }
+        });
+    }
+}
+
+function save() {
+    console.log('sdlll')
+    console.log(apis.save, order)
+    $.post(apis.save, detail, function(res) {
+        console.log(res)
+    });
+}
+
+$(function() {
+    //getConfig();
+    getOrder();
+});
+
+
 </script>
 {% endblock %}
