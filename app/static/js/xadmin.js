@@ -205,6 +205,10 @@ function mesg(message) {
     }, 2000);
 }
 
+function showMessage(message) {
+    layer.msg(message || '添加成功!', {icon: 1, time: 3000});
+}
+
 function getParams(query) {
     var result = {};
     if (query.length) {

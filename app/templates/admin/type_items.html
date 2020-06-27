@@ -15,7 +15,6 @@
 
     <xblock>
         <button class="layui-btn" onclick="x_admin_show('添加类型','{{url_for("admin.add_type_item")}}','1150','450')">添加类型</button>
-
     </xblock>
     <table class="layui-table">
         <thead>
@@ -37,7 +36,7 @@
                 <!--<a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
                     <i class="layui-icon">&#xe705;</i>
                 </a>-->
-                <a title="编辑" href="{{url_for('admin.add_type_item', edit=True, type_id=i.id)}}">
+                <a title="编辑" href="{{url_for('admin.add_type_item', edit=True, id=i.id)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
                 <a title="删除" onclick="member_del(this,'{{i.id}}')">
@@ -57,7 +56,7 @@
         layer.confirm('确认要删除吗？', function (index) {
             //发异步删除数据
             $.get(
-                'http://127.0.0.1:5052/admin/del_type_item?id=' + id,
+                '/admin/del_type_item?id=' + id,
                 function (html) {
                     location.reload();
                 }
@@ -66,8 +65,6 @@
             layer.msg('已删除!', {icon: 1, time: 1000});
         });
     }
-
-
 </script>
 
 {% endblock %}

@@ -16,12 +16,12 @@
                 </select>
             </div>
         </div>
-        <!--<div class="layui-form-item">
+        <div class="layui-form-item">
             <label class="layui-form-label">描述</label>
             <div class="layui-input-block">
                 <textarea class="layui-input" id="description" name="description" placeholder="请输入描述" required="" type="text"></textarea>
             </div>
-        </div>-->
+        </div>
         <div class="layui-form-item">
             <label class="layui-form-label">订单总价(元)</label>
             <div class="layui-input-block">
@@ -51,10 +51,12 @@
                             <th>价格</th>
                             <th>数量</th>
                             <th>单位</th>
-                            <th>操作</th>
+                            <th>长度</th>
+                            <th width="142">操作</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <input type="hidden" id="id"/>
                         <td>
                             <select id="types" lay-filter="type_id">
                                 <option value="">请选择</options>
@@ -64,7 +66,7 @@
                             </select>
                         </td>
                         <td>
-                            <select id="type_items">
+                            <select id="type_items" lay-filter="type_item_id">
                                 <option value="">请选择</options>
                                 {% for type in type_items %}
                                 <option data-goods_type_id="{{type.goods_type_id}}" value="{{type.id}}">{{type.item_name}}</option>
@@ -75,10 +77,18 @@
                             <input class="layui-input" id="price" lay-verify="required" placeholder="请输入单价" required type="text">
                         </td>
                         <td>
-                            <input class="layui-input" id="num" lay-verify="required" placeholder="请输入数量" required type="text">
+                            <input class="layui-input" id="num" lay-verify="required|number" placeholder="请输入数量" required type="text">
                         </td>
                         <td>
-                            <input class="layui-input" id="unit" lay-verify="required" placeholder="请输入单位" required type="text">
+                            <select id="unit" lay-filter="unit" lay-verify="required" placeholder="请输入单位" required readonly>
+                                <option value="">请选择</options>
+                                <option value="1">米</options>
+                                <option value="2">支</options>
+                                <option value="3">个</options>
+                            </select>
+                        </td>
+                        <td>
+                            <input class="layui-input" id="length" lay-verify="required" placeholder="请输入长度" required type="text">
                         </td>
                         <td><button class="layui-btn" onclick="addItem()" type="button">添加</button></td>
                     </tbody>
@@ -88,28 +98,46 @@
         <div class="layui-form-item">
             <div class="layui-form-label"></div>
             <div class="layui-input-block">
-                <input class="layui-btn" id="submit" lay-filter="subm" type="button" onclick="save()" type="submit" value="保存">
+                <button class="layui-btn" id="submit" lay-filter="subm" type="button">保存</button>
                 <button type="button" onclick="goBack()" class="layui-btn layui-btn-primary">返回</button>
             </div>
         </div>
     </form>
 </div>
 <script>
-
-
 layui.use('form', function() {
     form = layui.form
     form.on('select(type_id)', function(data) {
         var id = $('#types').val();
-        $('#type_items option').each(function(i, el) {
-            var goods_type_id = $(el).data('goods_type_id');
-            if(goods_type_id != id) {
-                $(el).attr('disabled', true);
-            } else {
-                $(el).attr('disabled', false);
+        $('#length').val('');
+        $('#type_items').empty();
+        $('#type_items').append('<option value="">请选择</options>');
+        $.each(config.type_items, function(i, item) {
+            if(item.goods_type_id == id) {
+                $('#type_items').append(`<option data-goods_type_id="${item.goods_type_id}" value="${item.id}">${item.item_name}</option>`);
             }
-            form.render('select');
         });
+        renderForm();
+    });
+    form.on('select(type_item_id)', function(data) {
+        var id = $('#type_items').val();
+        $('#length').val('');
+        if(id && config.type_items[id].unit == 1) {
+            $('#length').attr('disabled', false);
+        } else {
+            $('#length').attr('disabled', true);
+        }
+        renderForm();
+    });
+    form.on('select(unit)', function(data) {
+        var val = $('#type_items').val();
+        $('#length').val('');
+        if(val == 1) {
+            $('#length').attr('disabled', false);
+        } else {
+            $('#length').attr('disabled', true);
+        }
+        renderForm();
     });
 });
 
@@ -128,6 +156,11 @@ var config = {
         {% for item in type_items %}
         {{item.id}}: {id: {{item.id}}, item_name: "{{item.item_name}}", goods_type_id: {{item.goods_type_id}}, unit: "{{item.unit}}"},
         {% endfor %}
+    },
+    unit: {
+        1: '米',
+        2: '支',
+        3: '个',
     }
 };
 
@@ -140,23 +173,28 @@ var order = {
     order_no: '',
     guest_id: '',
     guest_name: '',
+    description: '',
 };
 
 function appendItem(data) {
-    console.log('ddd', data)
-    var str = `<tr>
+    var str = `<tr data-id="${data.id || 0}">
     <td>${config.types[data.item_id].name}</td>
     <td>${data.item_name}</td>
     <td>${data.price}</td>
     <td>${data.num}</td>
-    <td>${data.unit}</td>
-    <td><button class="layui-btn" type="button">删除</button></td>
+    <td>${config.unit[data.unit]}</td>
+    <td>${data.length}</td>
+    <td>
+        <button class="layui-btn btn-edit" type="button" >修改</button>
+        <button class="layui-btn btn-delete" type="button" >删除</button>
+    </td>
     </tr`;
     $('#detail tbody').prepend(str)
 }
 
 function initOrder(order) {
     $('#guest_name').val(order.guest_id);
+    $('#description').val(order.description);
     $('#total').val(order.total);
     $('#pay').val(order.pay);
     $('#unpay').val(order.unpay);
@@ -164,23 +202,54 @@ function initOrder(order) {
     $.each(order.details, function(i, data) {
         appendItem(data);
     });
-
     renderForm();
 }
 
 function addItem() {
-    var data = {};
-    data.item_id = $('#types').val();
-    data.item_name = config.type_items[$('#type_items').val()].item_name;
-    data.price = $('#price').val();
-    data.num = $('#num').val();
-    data.unit = $('#unit').val();
+    var id = $('#id').val() || 0;
+    var type_id = $('#types').val();
+    if(!type_id) {
+        showMessage('请选择分类');
+        return;
+    }
+    var type_item_id = $('#type_items').val();
+    if(!type_item_id) {
+        showMessage('请选择规格');
+        return;
+    }
+
+    var price = $('#price').val();
+    var num = $('#num').val();
+    if(!price || !num) {
+        showMessage('请填写完整');
+        return;
+    }
+
+    var unit = $('#unit').val();
+    var length = $('#length').val();
+    if(unit == 1 && !length) {
+        showMessage('请填写长度');
+        return;
+    }
+
+    var data = {
+        id: 0,
+        num: num,
+        unit: unit,
+        price: price,
+        type_id: type_id,
+        item_id: type_item_id,
+        item_name: config.type_items[type_item_id].item_name,
+    };
+    length && (data.length = length);
     appendItem(data);
+
     $('#types').val('');
     $('#type_items').val('');
     $('#price').val('');
     $('#num').val('');
     $('#unit').val('');
+    $('#lenght').val('');
     renderForm();
 }
 
@@ -204,16 +273,63 @@ function getOrder() {
     }
 }
 
-function save() {
-    console.log('sdlll')
-    console.log(apis.save, order)
-    $.post(apis.save, detail, function(res) {
-        console.log(res)
+$('#detail').on('click', '.btn-delete', function(e) {
+    var $this = $(this);
+    var $tr = $this.parent().parent();
+    var id = $tr.data('id');
+    if(id) {
+        var idx = order.details.findIndex(function(item) {
+            return item.id == id;
+        });
+        var target = order.details[idx];
+        target.status = 2;
+        order.details[idx] = target;
+    } else {
+
+    }
+    $tr.remove();
+});
+
+$('#detail').on('click', '.btn-edit', function(e) {
+    var $this = $(this);
+    var $tr = $this.parent().parent();
+    var id = $tr.data('id');
+    var target = order.details.find(function(item) {
+        return item.id == id;
     });
-}
+
+    $('#id').val(target.id);
+    $('#types').val(target.type_id);
+    $('#type_items').val(target.item_id);
+    $('#price').val(target.price);
+    $('#num').val(target.num);
+    $('#unit').val(target.unit);
+    $('#lenght').val(target.length || '');
+    $tr.remove();
+    renderForm();
+});
+
+$('#submit').on('click', function(e) {
+    $.ajax({
+        type: 'post',
+        url: apis.save,
+        dataType: 'json',
+        data: order,
+        processData : true,
+        success: function(res) {
+            if (res.result_code !== 'success') {
+                alert('信息修');
+            } else {
+                mesg(res.message || '保存成功');
+		    }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert('系统异常');
+        }
+    });
+});
 
 $(function() {
-    //getConfig();
     getOrder();
 });
 
