@@ -199,9 +199,33 @@ function x_admin_close(){
 }
 
 function mesg(message) {
-    console.log('sdlfasdfjalsdjflajsdlkfajsl')
     layer.msg(message || '添加成功!', {icon: 1, time: 3000});
     setTimeout(function () {
         x_admin_close();
     }, 2000);
+}
+
+function getParams(query) {
+    var result = {};
+    if (query.length) {
+        const params = query.split('&');
+        params.forEach(function(item) {
+            const itemArr = item.split('=');
+            const key = decodeURIComponent(itemArr[0] || '');
+            const value = decodeURIComponent(itemArr[1] || '');
+            result[key.replace(/\+/g, ' ')] = value.replace(/\+/g, ' ');
+        });
+    }
+    return result;
+}
+
+function goBack() {
+    window.history.back(-1);
+}
+
+function renderForm() {
+    layui.use('form', function() {
+        layui.form.render();
+    });
+
 }

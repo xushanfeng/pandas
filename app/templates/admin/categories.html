@@ -9,12 +9,12 @@
             {{form.name}}
             {{form.csrf_token}}
             {{form.submit}}
+            <button class="layui-btn" type="button" onclick="goBack();">重置</button>
         </form>
     </div>
 
     <xblock>
         <button class="layui-btn" onclick="x_admin_show('添加类型','{{url_for("admin.add_goods_type")}}','1150','450')">添加类型</button>
-
     </xblock>
     <table class="layui-table">
         <thead>
@@ -29,12 +29,11 @@
         <tr>
             <td>{{i.name}}</td>
             <td>{{i.description}}</td>
-
             <td class="td-manage">
-                <a title="详情"  href="javascript:;">
+                <!--<a title="详情" onclick="member_del(this,'{{i.id}}')" href="javascript:;">
                     <i class="layui-icon">&#xe705;</i>
-                </a>
-                <a title="编辑"  href="{{url_for('admin.add_goods_type', edit=True, type_id=i.id)}}">
+                </a>-->
+                <a title="编辑" href="{{url_for('admin.add_goods_type', edit=True, type_id=i.id)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
                 <a title="删除" onclick="member_del(this,'{{i.id}}')" href="javascript:;">

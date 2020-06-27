@@ -9,12 +9,11 @@
             {{form.name}}
             {{form.csrf_token}}
             {{form.submit}}
+            <button class="layui-btn" type="button" onclick="goBack();">重置</button>
         </form>
     </div>
 
-    <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加订单','{{url_for("admin.add_order")}}','1150','450')">添加订单</button>
-    </xblock>
+    <a class="layui-btn" href="{{url_for("admin.add_order")}}">添加订单</a>
     <table class="layui-table">
         <thead>
         <tr>

@@ -345,54 +345,13 @@ def order(page=None):
 
 
 # 添加出库单
-@admin.route("/add_order/", methods=["GET", "POST"])
+@admin.route("/add_order/", methods=["GET"])
 def add_order():
     """添加出库单"""
-    form = OrderForm()
-    edit = request.args.get('edit')
-    order_no = request.args.get('order_no')
-    if not edit and not order_no:
-        if form.submit.data:
-            data = form.data
-            order = Order(
-                order_no=time.strftime("%y%m%d%H%M%s", time.localtime()),
-                guest_id=data['guest_name'],
-                total=data['total'],
-                pay=data['pay'],
-                unpay=data['unpay'],
-                description=data['description'],
-                operator_id=session.get('admin_id')
-            )
-            db.session.add(order)
-            for item in form.details.data:
-                detail = {}
-                detail['type_id'] = item.pop('type_id')
-                detail['item_id'] = item.pop('item_id')
-                detail['price'] = item.pop('price')
-                detail['num'] = item.pop('num')
-                new_item = OrderDetail(**detail)
-                order.order_detail.append(new_item)
-            db.session.commit()
-            flash("添加小类")
-    elif edit and request.method.lower() == 'get':
-        order_base = db.session.query(Order, Guest) \
-            .join(Guest, Order.guest_id == Guest.user_id)\
-            .filter(Order.order_no == order_no).first()
-        if not order_base:
-            return render_template("admin/add_order.html", form=form)
-
-        details = db.session.query(GoodsType.id, TypeItem.id, OrderDetail.price, OrderDetail.num, TypeItem.unit) \
-            .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
-            .join(TypeItem, TypeItem.id == OrderDetail.item_id)\
-            .filter(order_base[0].id == OrderDetail.order_id).all()
-        print(details)
-        form = OrderForm(guest_name=order_base[1].user_id,
-                         description=order_base[0].description,
-                         total=order_base[0].total,
-                         pay=order_base[0].pay,
-                         unpay=order_base[0].unpay,
-                         details=details)
-    return render_template("admin/add_order.html", form=form)
+    guests = Guest.query.filter(Guest.status == 1).all()
+    typeItems = TypeItem.query.filter(GoodsType.status == 1, TypeItem.status == 1).all()
+    types = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).all()
+    return render_template("admin/add_order.html", guests=guests, types=types, type_items=typeItems)
 
 
 # 忘记密码路由
