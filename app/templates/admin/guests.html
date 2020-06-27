@@ -54,7 +54,7 @@
         layer.confirm('确认要删除吗？', function (index) {
             //发异步删除数据
             $.get(
-                'http://127.0.0.1:5052/admin/del_guest?id=' + id,
+                '/admin/del_guest?id=' + id,
                 function (html) {
                     location.reload();
                 }
