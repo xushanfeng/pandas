@@ -313,9 +313,9 @@ $('#submit').on('click', function(e) {
     $.ajax({
         type: 'post',
         url: apis.save,
-        dataType: 'json',
-        data: order,
-        processData : true,
+        dataType: 'text',
+        data: JSON.stringify(order),
+        processData : false,
         success: function(res) {
             if (res.result_code !== 'success') {
                 alert('信息修');
