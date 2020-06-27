@@ -313,12 +313,12 @@ $('#submit').on('click', function(e) {
     $.ajax({
         type: 'post',
         url: apis.save,
-        dataType: 'text',
+        dataType: 'json',
         data: JSON.stringify(order),
         processData : false,
         success: function(res) {
             if (res.result_code !== 'success') {
-                alert('信息修');
+                mesg(res.message || '保存失败');
             } else {
                 mesg(res.message || '保存成功');
 		    }
