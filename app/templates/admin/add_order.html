@@ -51,7 +51,7 @@
                             <th>价格</th>
                             <th>数量</th>
                             <th>单位</th>
-                            <th>长度</th>
+                            <th width="120">长度</th>
                             <th width="142">操作</th>
                         </tr>
                     </thead>
@@ -80,15 +80,14 @@
                             <input class="layui-input" id="num" lay-verify="required|number" placeholder="请输入数量" required type="text">
                         </td>
                         <td>
-                            <select id="unit" lay-filter="unit" lay-verify="required" placeholder="请输入单位" required readonly>
-                                <option value="">请选择</options>
+                            <select id="unit" lay-filter="unit" lay-verify="required" placeholder="请输入单位" required disabled>
                                 <option value="1">米</options>
                                 <option value="2">支</options>
                                 <option value="3">个</options>
                             </select>
                         </td>
                         <td>
-                            <input class="layui-input" id="length" lay-verify="required" placeholder="请输入长度" required type="text">
+                            <input class="layui-input" id="length" lay-verify="required" placeholder="请输入长度" required type="text" style="display:none;">
                         </td>
                         <td><button class="layui-btn" onclick="addItem()" type="button">添加</button></td>
                     </tbody>
@@ -122,9 +121,12 @@ layui.use('form', function() {
     form.on('select(type_item_id)', function(data) {
         var id = $('#type_items').val();
         $('#length').val('');
-        if(id && config.type_items[id].unit == 1) {
+        $('#unit').val(config.type_items[id].unit);
+        if(config.type_items[id].unit == 1) {
             $('#length').attr('disabled', false);
+            $('#length').show();
         } else {
+            $('#length').hide();
             $('#length').attr('disabled', true);
         }
         renderForm();
@@ -192,7 +194,7 @@ function appendItem(data) {
     <td>${data.price}</td>
     <td>${data.num}</td>
     <td>${config.unit[data.unit]}</td>
-    <td>${data.length}</td>
+    <td>${data.length || ''}</td>
     <td>
         <button class="layui-btn btn-edit" type="button" >修改</button>
         <button class="layui-btn btn-delete" type="button" >删除</button>
@@ -257,7 +259,7 @@ function addItem() {
     $('#price').val('');
     $('#num').val('');
     $('#unit').val('');
-    $('#lenght').val('');
+    $('#length').val('');
     renderForm();
 }
 
@@ -312,7 +314,10 @@ $('#detail').on('click', '.btn-edit', function(e) {
     $('#price').val(target.price);
     $('#num').val(target.num);
     $('#unit').val(target.unit);
-    $('#lenght').val(target.length || '');
+    $('#length').val(target.length || '');
+    if(target.unit == 1) {
+        $('#length').show();
+    }
     $tr.remove();
     renderForm();
 });
@@ -337,7 +342,6 @@ $('#submit').on('click', function(e) {
         data.order_no = order.order_no;
     }
     data.details = order.details;
-    console.log(data.details);
     $.ajax({
         type: 'post',
         url: apis.save,
