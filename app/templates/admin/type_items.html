@@ -37,7 +37,7 @@
                 <!--<a title="详情" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
                     <i class="layui-icon">&#xe705;</i>
                 </a>-->
-                <a title="编辑" href="{{url_for('admin.add_type_item', edit=True, type_id=i.id)}}">
+                <a title="编辑" href="{{url_for('admin.add_type_item', edit=True, id=i.id)}}">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
                 <a title="删除" onclick="member_del(this,'{{i.id}}')">

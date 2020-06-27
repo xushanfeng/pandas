@@ -151,6 +151,7 @@ def orders():
         "order_no": order_base[0].order_no,
         "guest_id": order_base[1].user_id,
         "guest_name": order_base[1].user_name,
+        "description": order_base[0].description,
         "total": order_base[0].total,
         "pay": order_base[0].pay,
         "unpay": order_base[0].unpay,

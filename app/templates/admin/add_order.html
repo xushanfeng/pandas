@@ -16,12 +16,12 @@
                 </select>
             </div>
         </div>
-        <!--<div class="layui-form-item">
+        <div class="layui-form-item">
             <label class="layui-form-label">描述</label>
             <div class="layui-input-block">
                 <textarea class="layui-input" id="description" name="description" placeholder="请输入描述" required="" type="text"></textarea>
             </div>
-        </div>-->
+        </div>
         <div class="layui-form-item">
             <label class="layui-form-label">订单总价(元)</label>
             <div class="layui-input-block">
@@ -64,7 +64,7 @@
                             </select>
                         </td>
                         <td>
-                            <select id="type_items">
+                            <select id="type_items" lay-filter="type_item_id">
                                 <option value="">请选择</options>
                                 {% for type in type_items %}
                                 <option data-goods_type_id="{{type.goods_type_id}}" value="{{type.id}}">{{type.item_name}}</option>
@@ -78,7 +78,7 @@
                             <input class="layui-input" id="num" lay-verify="required" placeholder="请输入数量" required type="text">
                         </td>
                         <td>
-                            <input class="layui-input" id="unit" lay-verify="required" placeholder="请输入单位" required type="text">
+                            <input class="layui-input" id="unit" lay-verify="required" placeholder="请输入单位" required readonly type="text">
                         </td>
                         <td><button class="layui-btn" onclick="addItem()" type="button">添加</button></td>
                     </tbody>
@@ -95,21 +95,23 @@
     </form>
 </div>
 <script>
-
-
 layui.use('form', function() {
     form = layui.form
     form.on('select(type_id)', function(data) {
         var id = $('#types').val();
-        $('#type_items option').each(function(i, el) {
-            var goods_type_id = $(el).data('goods_type_id');
-            if(goods_type_id != id) {
-                $(el).attr('disabled', true);
-            } else {
-                $(el).attr('disabled', false);
+        $('#type_items').empty();
+        $('#type_items').append('<option value="">请选择</options>');
+        $.each(config.type_items, function(i, item) {
+            if(item.goods_type_id == id) {
+                $('#type_items').append(`<option data-goods_type_id="${item.goods_type_id}" value="${item.id}">${item.item_name}</option>`);
             }
-            form.render('select');
         });
+        renderForm();
+    });
+    form.on('select(type_item_id)', function(data) {
+        var id = $('#type_items').val();
+        $('#unit').val(config.type_items[id].unit);
+        renderForm();
     });
 });
 
@@ -140,10 +142,10 @@ var order = {
     order_no: '',
     guest_id: '',
     guest_name: '',
+    description: '',
 };
 
 function appendItem(data) {
-    console.log('ddd', data)
     var str = `<tr>
     <td>${config.types[data.item_id].name}</td>
     <td>${data.item_name}</td>
@@ -157,6 +159,7 @@ function appendItem(data) {
 
 function initOrder(order) {
     $('#guest_name').val(order.guest_id);
+    $('#description').val(order.description);
     $('#total').val(order.total);
     $('#pay').val(order.pay);
     $('#unpay').val(order.unpay);
@@ -164,7 +167,6 @@ function initOrder(order) {
     $.each(order.details, function(i, data) {
         appendItem(data);
     });
-
     renderForm();
 }
 
@@ -205,15 +207,26 @@ function getOrder() {
 }
 
 function save() {
-    console.log('sdlll')
-    console.log(apis.save, order)
-    $.post(apis.save, detail, function(res) {
-        console.log(res)
+    $.ajax({
+        type: 'post',
+        url: apis.save,
+        dataType: 'json',
+        data: order,
+        processData : true,
+        success: function(res) {
+            if (res.result_code !== 'success') {
+                alert('信息修');
+            } else {
+                mesg(res.message || '保存成功');
+		    }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            alert('系统异常');
+        }
     });
 }
 
 $(function() {
-    //getConfig();
     getOrder();
 });
 
