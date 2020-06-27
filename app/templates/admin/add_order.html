@@ -177,7 +177,16 @@ var order = {
 };
 
 function appendItem(data) {
-    var str = `<tr data-id="${data.id || 0}">
+    if(data.id) {
+        var idx = order.details.findIndex(function(item) {
+            return item.id == data.id;
+        });
+        order.details[idx] = data;
+    } else {
+        order.details.push(data);
+    }
+
+    var str = `<tr data-id="${data.id}">
     <td>${config.types[data.item_id].name}</td>
     <td>${data.item_name}</td>
     <td>${data.price}</td>
@@ -233,7 +242,7 @@ function addItem() {
     }
 
     var data = {
-        id: 0,
+        id: id,
         num: num,
         unit: unit,
         price: price,
@@ -243,7 +252,6 @@ function addItem() {
     };
     length && (data.length = length);
     appendItem(data);
-
     $('#types').val('');
     $('#type_items').val('');
     $('#price').val('');
@@ -310,11 +318,31 @@ $('#detail').on('click', '.btn-edit', function(e) {
 });
 
 $('#submit').on('click', function(e) {
+    var guest_id = $('#guest_name').val();
+    var description = $('#description').val();
+    var total = $('#total').val();
+    var unpay = $('#unpay').val();
+    var pay = $('#pay').val();
+
+    var data = {
+        description: description,
+        guest_id: guest_id,
+        total: total,
+        unpay: unpay,
+        pay: pay,
+    }
+
+    if(!!order.id) {
+        data.id = order.id;
+        data.order_no = order.order_no;
+    }
+    data.details = order.details;
+    console.log(data.details);
     $.ajax({
         type: 'post',
         url: apis.save,
         dataType: 'json',
-        data: JSON.stringify(order),
+        data: JSON.stringify(data),
         processData : false,
         success: function(res) {
             if (res.result_code !== 'success') {
