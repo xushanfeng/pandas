@@ -37,7 +37,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">未付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="请输入未付款金额" required="" type="text" >
+                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required type="text" readonly>
             </div>
         </div>
         <div class="layui-form-item">
@@ -283,6 +283,15 @@ function getOrder() {
     }
 }
 
+$('#total, #pay').on('input', function(e) {
+    var total = $('#total').val();
+    var pay = $('#pay').val();
+    if(total && pay) {
+        $('#unpay').val(total - pay);
+    }
+});
+
+
 $('#detail').on('click', '.btn-delete', function(e) {
     var $this = $(this);
     var $tr = $this.parent().parent();
@@ -304,6 +313,11 @@ $('#detail').on('click', '.btn-edit', function(e) {
     var $this = $(this);
     var $tr = $this.parent().parent();
     var id = $tr.data('id');
+    const _id = $('#id').val();
+    if(_id) {
+        addItem();
+    }
+
     var target = order.details.find(function(item) {
         return item.id == id;
     });

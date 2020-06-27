@@ -10,7 +10,7 @@ from flask_mail import Mail
 app = Flask(__name__)
 
 # 数据库配置
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:Aa123456@127.0.0.1:3306/pandas_bak?charset=utf8"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@127.0.0.1:3306/pandas_bak?charset=utf8"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 # 密钥配置，在生产环境中使用系统自动生成
 app.config['SECRET_KEY'] = 'd890fbe7e26c4c3eb557b6009e3f4d3d'
