@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 import time
 
 from flask import request, jsonify
@@ -21,6 +20,7 @@ def add_order():
         request_data = request.get_data().decode('utf-8')
         request_json = json.loads(request_data)
         order_id = request_json.get("id")
+        total_pay = 0
         if not order_id:
             order = Order(
                 order_no=time.strftime("%y%m%d%H%M%s", time.localtime()),
@@ -41,8 +41,13 @@ def add_order():
                     detail['num'] = item.pop('num')
                     detail['status'] = 1
                     detail['lengh'] = item.pop('length')
+                    if detail.get('lengh'):
+                        total_pay = total_pay + float(detail['num']) * float(detail['price']) * float(detail['lengh'])
+                    else:
+                        total_pay = total_pay + float(detail['num']) * float(detail['price'])
                     new_item = OrderDetail(**detail)
                     order.order_detail.append(new_item)
+            db.session.query(Order).filter(Order.id == order.id).update({'total': total_pay})
             db.session.commit()
         else:
             db.session.query(Order).filter(Order.id == order_id).update({
@@ -64,32 +69,38 @@ def add_order():
                 .filter(order_base[0].id == OrderDetail.order_id, OrderDetail.status == 1).all()
             new_details = request_json.get('details')
 
-            if not origin_details and not new_details:
-                db.session.commit()
-            elif not origin_details and new_details:
+            if not origin_details and new_details:
                 # add
                 objs = list()
                 for _ in new_details:
+                    if _.get('length'):
+                        total_pay = total_pay + float(_['num']) * float(_['price']) * float(_['lengh'])
+                    else:
+                        total_pay = total_pay + float(_['num']) * float(_['price'])
                     fill_order_detail(order_id, _, objs)
                 db.session.add_all(objs)
-                db.session.commit()
 
             elif origin_details and not new_details:
                 # 删除
                 for _ in origin_details:
                     db.session.query(OrderDetail).filter(OrderDetail.id == _[0]).update({OrderDetail.status: 2})
-                db.session.commit()
-            else:
+            elif origin_details and new_details:
                 # 更新
                 origin_detail_ids = [_[0] for _ in origin_details]
                 objs = list()
                 for _ in new_details:
-                    if not _.get('id'):
-                        fill_order_detail(order_id, _, objs)
-                    elif int(_.get('id')) not in origin_detail_ids:
+                    if not _.get('id') or int(_.get('id')) not in origin_detail_ids:
+                        if _.get('length'):
+                            total_pay = total_pay + float(_['num']) * float(_['price']) * float(_['length'])
+                        else:
+                            total_pay = total_pay + float(_['num']) * float(_['price'])
                         fill_order_detail(order_id, _, objs)
                     else:
                         if _.get('status', 1) != 2:
+                            if _.get('length'):
+                                total_pay = total_pay + float(_['num']) * float(_['price']) * float(_['length'])
+                            else:
+                                total_pay = total_pay + float(_['num']) * float(_['price'])
                             db.session.query(OrderDetail) \
                                 .filter(OrderDetail.id == _.get('id')) \
                                 .update({OrderDetail.type_id: _.get("type_id"),
@@ -102,7 +113,8 @@ def add_order():
                                 {OrderDetail.status: 2})
                 if objs:
                     db.session.add_all(objs)
-                db.session.commit()
+            db.session.query(Order).filter(Order.id == order_id).update({'total': total_pay})
+            db.session.commit()
         return jsonify(base_success_res({}))
     except Exception as e:
         print(e)
@@ -259,6 +271,7 @@ def order_print():
         .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
         .filter(OrderDetail.status == 1, OrderDetail.order_id == order_id).all()
     details = []
+    amount_receivable = 0
     for i in detail_data:
         detail = {}
         order_detail = i[0]
@@ -268,15 +281,21 @@ def order_print():
         detail['type_item'] = type_item.item_name
         num = float(order_detail.num if order_detail.num else 0)
         detail['num'] = num
+        detail['unit'] = type_item.unit
         price = float(order_detail.price if order_detail.price else 0)
         detail['price'] = "￥{}".format(price)
         if type_item.unit == '1':
             detail['length'] = order_detail.lengh if order_detail.lengh else 0
             detail['total_length'] = detail.get('length') * detail.get('num')
-            detail['item_total'] = "￥{}".format(detail.get('length') * num * price)
+            item_total = round(detail.get('length') * num * price, 2)
+            detail['item_total'] = "￥{}".format(item_total)
+            amount_receivable = amount_receivable + item_total
         else:
-            detail['item_total'] = "￥{}".format(num * price)
+            item_total = round(num * price, 2)
+            detail['item_total'] = "￥{}".format(item_total)
+            amount_receivable = amount_receivable + item_total
         details.append(detail)
+    print_info['amount_receivable'] = amount_receivable
     print_info['details'] = details
     return jsonify(base_success_res(print_info))
 

@@ -416,7 +416,7 @@ class DetailOrderForm(FlaskForm):
             "class": "contrller",
         }
     )
-    price = StringField(
+    price = IntegerField(
         label='单价',
         validators=[
             DataRequired()
@@ -429,7 +429,7 @@ class DetailOrderForm(FlaskForm):
             "placeholder": "请输入单价",
         }
     )
-    num = StringField(
+    num = IntegerField(
         label='数量',
         validators=[
             DataRequired()
@@ -457,7 +457,7 @@ class DetailOrderForm(FlaskForm):
         }
     )
 
-    length = StringField(
+    length = IntegerField(
         label='长度',
         validators=[
             DataRequired()
@@ -498,7 +498,7 @@ class OrderForm(FlaskForm):
         }
     )
 
-    total = StringField(
+    total = IntegerField(
         label='总价',
         validators=[
             DataRequired()
@@ -512,7 +512,7 @@ class OrderForm(FlaskForm):
         }
     )
 
-    pay = StringField(
+    pay = IntegerField(
         label='已付款',
         validators=[
             DataRequired()
@@ -526,7 +526,7 @@ class OrderForm(FlaskForm):
         }
     )
 
-    unpay = StringField(
+    unpay = IntegerField(
         label='未付款',
         validators=[
             DataRequired()
