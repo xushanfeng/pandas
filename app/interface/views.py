@@ -1,11 +1,14 @@
+import datetime
 import json
 import time
 
 from flask import request, jsonify
+from sqlalchemy import func
 
 from app.apps import db
 from app.interface import inter
 from app.models import GoodsType, TypeItem, Order, OrderDetail, Guest
+from app.src.compute import user_statistics
 from app.utils.base_res import base_success_res, base_fail_res
 from app.utils.doc import admin_login_req
 
@@ -133,7 +136,7 @@ def orders():
     if order_id:
         base_query = base_query.filter(Order.id == order_id)
     if order_no:
-        base_query = base_query.filter(Order.order_no == Order.order_no)
+        base_query = base_query.filter(Order.order_no == order_no)
     order_base = base_query.first()
     if not order_base:
         return jsonify(base_fail_res("订单号", {"items": []}))
@@ -222,3 +225,82 @@ def guests():
     return jsonify(base_success_res(
         {"items": [{"guest_id": _.user_id, "guest_name": _.user_name} for _ in
                    page_data]}))
+
+
+@inter.route("/user_pay_statistics", methods=['GET'])
+# @admin_login_req
+def user_pay_statistics():
+    guest_name = str(request.args.get('name', ''))
+    order_no = str(request.args.get('order_no', ''))
+    if not guest_name and not order_no:
+        return jsonify(base_fail_res("miss params", None))
+    start_time = request.args.get('start_time', '')
+    end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    result = user_statistics(guest_name, order_no, start_time, end_time)
+    #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
+    return jsonify(base_success_res(result)) if result.get('result_code') != 'error' else jsonify(result)
+
+
+@inter.route("/order_print", methods=['GET'])
+# @admin_login_req
+def order_print():
+    order_id = str(request.args.get('order_id', ''))
+    if not order_id:
+        return jsonify(base_fail_res("miss params order_id", None))
+    base_info = db.session.query(Order, Guest) \
+        .join(Guest, Order.guest_id == Guest.user_id) \
+        .filter(Order.id == order_id).all()
+    if not base_info or not base_info[0]:
+        return jsonify(base_fail_res("order_id invalid", None))
+    print_info = print_template()
+    print_info['guest_name'] = base_info[0][1].user_name
+    print_info['guest_phone'] = base_info[0][1].user_phone
+    print_info['order_no'] = base_info[0][0].order_no
+    print_info['amount_receivable'] = base_info[0][0].total
+    print_info['out_date'] = datetime.datetime.strftime(base_info[0][0].add_time, "%Y/%m/%d")
+
+    detail_data = db.session.query(OrderDetail, TypeItem, GoodsType) \
+        .join(TypeItem, TypeItem.id == OrderDetail.item_id) \
+        .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
+        .filter(OrderDetail.status == 1, OrderDetail.order_id == order_id).all()
+    details = []
+    for i in detail_data:
+        detail = {}
+        order_detail = i[0]
+        type_item = i[1]
+        goods_type = i[2]
+        detail['goods_type'] = goods_type.name
+        detail['type_item'] = type_item.item_name
+        num = float(order_detail.num if order_detail.num else 0)
+        detail['num'] = num
+        price = float(order_detail.price if order_detail.price else 0)
+        detail['price'] = "￥{}".format(price)
+        if type_item.unit == '1':
+            detail['length'] = order_detail.lengh if order_detail.lengh else 0
+            detail['total_length'] = detail.get('length') * detail.get('num')
+            detail['item_total'] = "￥{}".format(detail.get('length') * num * price)
+        else:
+            detail['item_total'] = "￥{}".format(num * price)
+        details.append(detail)
+    print_info['details'] = details
+    return jsonify(base_success_res(print_info))
+
+
+def print_template():
+    return {
+        'title': '南阳恒宇彩板 岩棉复合板 单瓦 楼承板 C Z 型钢',
+        'sub_title': '黄石山力 天津新宇彩卷南阳总代理 销售出货单',
+        'connect': '南阳兴达钢材市场 电话：0377-63150159 68060601',
+        'out_date': '',
+        'out_status': '已出货',
+        'order_no': '',
+        'guest_name': '',
+        'check': '',
+        'guest_phone': '',
+        'pay': '',
+        'amount_receivable': '',
+        'discount_amount': '',
+        'details': {
+
+        }
+    }

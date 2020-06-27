@@ -63,35 +63,6 @@ def code():
     return response
 
 
-# 注册路由
-@admin.route("/register/", methods=["GET", "POST"])
-def register():
-    """注册路由"""
-    form = RegisterForm()
-    if form.validate_on_submit():
-        data = form.data
-        names = User.query.filter_by(user_count=data['account']).count()
-        if names == 1:
-            flash('注册失败')
-            return redirect(url_for("admin.register"))
-        ses = ['', '男', '女']
-        names = User(
-            user_count=data['account'],
-            user_pwd=generate_password_hash((data['pwd'])),
-            user_name=data['name'],
-            user_sex=ses[data['sex']],
-            user_phone=data['phone'],
-            user_mail=data['mail']
-        )
-
-        db.session.add(names)
-        db.session.commit()
-        flash("注册成功")
-
-        return redirect(url_for("admin.login"))
-    return render_template("admin/register.html", form=form)
-
-
 # 客户管理
 @admin.route("/guests/<int:page>", methods=["GET", "POST"])
 @admin_login_req
@@ -477,37 +448,6 @@ def person_detail():
 
     return render_template("admin/person_detail.html", form=form, usermessage=usermessage)
 
-
-#
-# 忘记密码
-@admin.route("/wjmm/", methods=['GET', 'POST'])
-def wjmm():
-    form = wjpasswd()
-    if form.validate_on_submit():
-        usermessage = User.query.filter(User.user_count == form.data["countname"]).first()
-        if usermessage is None:
-            flash("账号错误！")
-            return render_template("admin/wjmm.html", form=form)
-        admin = User.query.filter_by(user_count=usermessage.user_count).first()
-
-        if admin.user_mail != form.data['account']:
-            flash('请输入正确的邮箱地址，或联系管理员修改')
-            return render_template("admin/wjmm.html", form=form)
-
-        admin.user_pwd = generate_password_hash((form.data['pwd']))
-        mails = []
-        mails.append(form.data['account'])
-        try:
-            msg = Message('修改密码通知', sender='gchase@163.com', recipients=mails)
-            msg.html = '<span>尊敬的</span>' + usermessage.user_name + '，您好：<br>您在we商贸中申请找回密码<br><b style="background-color: #FF0000">重设密码已完成,若非本人操作</b><br>请及时联系管理员修改<b>ganiner@163.com</b>'
-            mail.send(msg)
-            flash("修改成功")
-            db.session.commit()
-        except:
-            db.session.rollback()
-            db.session.flush()
-        return redirect(url_for('admin.login'))
-    return render_template("admin/wjmm.html", form=form)
 
 
 # 删除客户
