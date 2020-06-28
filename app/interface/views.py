@@ -1,6 +1,7 @@
 import datetime
 import json
 import time
+import traceback
 
 from flask import request, jsonify
 
@@ -11,6 +12,7 @@ from app.models import GoodsType, TypeItem, Order, OrderDetail, Guest
 from app.src.compute import user_statistics, compute_order_statistics
 from app.utils.base_res import base_success_res, base_fail_res
 from app.utils.doc import admin_login_req
+
 
 
 @inter.route("/add_order", methods=['POST'])
@@ -40,13 +42,14 @@ def add_order():
                     detail['price'] = item.pop('price')
                     detail['num'] = item.pop('num')
                     detail['status'] = 1
-                    detail['lengh'] = item.pop('length')
+                    detail['lengh'] = item.get('length')
                     if detail.get('lengh'):
                         total_pay = total_pay + float(detail['num']) * float(detail['price']) * float(detail['lengh'])
                     else:
                         total_pay = total_pay + float(detail['num']) * float(detail['price'])
                     new_item = OrderDetail(**detail)
                     order.order_detail.append(new_item)
+            db.session.flush()
             db.session.query(Order).filter(Order.id == order.id).update({'total': total_pay})
             db.session.commit()
         else:
@@ -117,7 +120,7 @@ def add_order():
             db.session.commit()
         return jsonify(base_success_res({}))
     except Exception as e:
-        print(e)
+        print(traceback.print_exc())
         return jsonify(base_fail_res(e.args, {}))
 
 
