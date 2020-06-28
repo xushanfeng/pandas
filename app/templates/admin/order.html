@@ -13,7 +13,8 @@
         </form>
     </div>
 
-    <a class="layui-btn" href="{{url_for("admin.add_order")}}">添加订单</a>
+<!--    <a class="layui-btn" href="{{url_for("admin.add_order")}}">添加订单</a>-->
+    <a class="layui-btn" onclick="x_admin_show('添加客户','{{url_for("admin.add_order")}}','1150','450')">添加订单</a>
     <table class="layui-table">
         <thead>
         <tr>
@@ -40,7 +41,7 @@
                 <a title="详情" >
                     <i class="layui-icon">&#xe705;</i>
                 </a>
-                <a title="编辑" href="{{url_for('admin.add_order',edit=True, order_no=i.order_no)}}">
+                <a title="编辑" onclick="x_admin_show('添加客户','{{url_for("admin.add_order",edit=True, order_no=i.order_no)}}','1150','450')">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
             </td>
@@ -52,13 +53,5 @@
     {{pg.page(page_data,'admin.order')}}
 
 </div>
-<script>
-    function mesg() {
-        layer.msg('搜索完成', {icon: 1, time: 10000});
-        setTimeout(function () {
-            x_admin_close();
-        }, 10000);
-    }
-</script>
 
 {% endblock %}

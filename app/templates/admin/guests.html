@@ -33,7 +33,7 @@
             <td>{{i.user_phone}}</td>
             <td>{{i.addr}}</td>
             <td class="td-manage">
-                <a title="编辑" href="{{url_for('admin.add_guest', edit=True, user_id=i.user_id)}}">
+                <a title="编辑" onclick="x_admin_show('保存客户','{{url_for("admin.add_guest", edit=True, user_id=i.user_id)}}','1150','450')">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
                 <a title="删除" onclick="member_del(this,'{{i.user_id}}')" href="javascript:;">
@@ -62,13 +62,6 @@
             $(obj).parents("tr").remove();
             layer.msg('已删除!', {icon: 1, time: 1000});
         });
-    }
-
-    function mesg() {
-        layer.msg('搜索完成', {icon: 1, time: 10000});
-        setTimeout(function () {
-            x_admin_close();
-        }, 10000);
     }
 
 

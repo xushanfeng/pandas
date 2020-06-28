@@ -14,7 +14,7 @@ from app.apps import db
 from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
 from app.admin.uilt import get_verify_code
-from app.constant.const import PAGE_LIMIT, SEX
+from app.constant.const import PAGE_LIMIT, SEX, CLOSE_WIN
 from app.models import User, Guest, GoodsType, TypeItem, Order
 from app.src.compute import home_order_statistics, compute_order_num_statistics, \
     money_statistics, num_money_statistics, string_money_statistics
@@ -111,6 +111,7 @@ def add_guest():
             db.session.add(guest)
             db.session.commit()
             flash("添加客户")
+            return CLOSE_WIN
     elif request.method.lower() == "get" and edit:
         user = Guest.query.filter_by(user_id=user_id).first()
         form = GuestForm(name=user.user_name,
@@ -136,6 +137,7 @@ def add_guest():
                          Guest.user_mail: data['email']})
             db.session.commit()
             flash("编辑客户")
+            return CLOSE_WIN
     return render_template("admin/add_guest.html", form=form)
 
 
@@ -169,12 +171,13 @@ def add_goods_type():
                 return redirect(url_for("admin.add_goods_type"))
             goods_type = GoodsType(
                 name=data['name'],
-                description=data['description']
+                description=data['description'],
+                status=1,
             )
             db.session.add(goods_type)
             db.session.commit()
             flash("添加大类")
-            return redirect(url_for("admin.category", page=1))
+            return CLOSE_WIN
     elif request.method.lower() == 'get' and edit:
         types = GoodsType.query.filter(GoodsType.id == type_id).first()
         if not types:
@@ -195,10 +198,7 @@ def add_goods_type():
                          GoodsType.description: data['description']})
             db.session.commit()
             flash("编辑类型")
-            form = GoodsTypeSearch()
-            page_data = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).paginate(page=1,
-                                                                                                             per_page=PAGE_LIMIT)
-            return render_template("admin/categories.html", form=form, page_data=page_data)
+            return CLOSE_WIN
     return render_template("admin/add_goods_type.html", form=form)
 
 
@@ -242,6 +242,7 @@ def add_type_item():
             db.session.add(item)
             db.session.commit()
             flash("添加小类")
+            return CLOSE_WIN
     elif request.method.lower() == 'get' and edit:
         items = TypeItem.query.filter(TypeItem.id == item_id).first()
         if not items:
@@ -266,14 +267,7 @@ def add_type_item():
                          TypeItem.description: data['description']})
             db.session.commit()
             flash("编辑类型")
-            form = TypeItemSearch()
-            page_data = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
-                                         GoodsType.name) \
-                .join(GoodsType, GoodsType.id == TypeItem.goods_type_id) \
-                .filter(TypeItem.status == 1) \
-                .order_by(TypeItem.id.desc()) \
-                .paginate(page=1, per_page=PAGE_LIMIT)
-            return render_template("admin/type_items.html", form=form, page_data=page_data)
+            return CLOSE_WIN
     return render_template("admin/add_type_item.html", form=form)
 
 

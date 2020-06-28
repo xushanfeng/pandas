@@ -183,7 +183,7 @@ class GuestForm(FlaskForm):
         }
     )
     submit = SubmitField(
-        "添加",
+        "保存",
         render_kw={
             "class": "layui-btn",
             "lay-filter": "subm",
@@ -272,7 +272,7 @@ class GoodsTypeForm(FlaskForm):
         }
     )
     submit = SubmitField(
-        "添加",
+        "保存",
         render_kw={
             "class": "layui-btn",
             "lay-filter": "subm",
@@ -377,7 +377,7 @@ class TypeItemForm(FlaskForm):
         }
     )
     submit = SubmitField(
-        "添加",
+        "保存",
         render_kw={
             "class": "layui-btn",
             "lay-filter": "subm",
@@ -560,7 +560,7 @@ class OrderForm(FlaskForm):
     )
 
     submit = SubmitField(
-        "添加",
+        "保存",
         render_kw={
             "class": "layui-btn",
             "lay-filter": "subm",

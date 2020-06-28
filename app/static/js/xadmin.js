@@ -193,7 +193,7 @@ function x_admin_show(title,url,w,h){
 
 /*关闭弹出框口*/
 function x_admin_close(){
-    parent.location.reload();
+    parent.location.reload(true);
     var index = parent.layer.getFrameIndex(window.name);
     parent.layer.close(index);
 }

@@ -9,3 +9,13 @@ UNIT = {
     "支": 2,
     "个": 3
 }
+
+CLOSE_WIN = '''
+<script>
+    setTimeout(function(){
+        parent.location.reload(true);
+        var index = parent.layer.getFrameIndex(window.name);
+        parent.layer.close(index);
+    },3);
+</script>
+'''
