@@ -1,11 +1,24 @@
-{% extends "admin/bases.html" %}
+{% extends "admin/bases_graph.html" %}
 
 
 {% block content %}
 
 <div class="x-body layui-anim layui-anim-up">
-    <blockquote class="layui-elem-quote">欢迎你：
-        <span class="x-red">登录本系统</span></blockquote>
+
+    <div class="layui-col-md6">
+        <blockquote class="layui-elem-quote">欢迎你：
+        <span class="x-red">登录本系统</span>
+        </blockquote>
+    </div>
+
+    <div class="layui-col-md6">
+        <blockquote class="layui-elem-quote">
+            <button onclick="refresh()">刷新</button>
+        </blockquote>
+
+    </div>
+
+
     <fieldset class="layui-elem-field">
         <legend>订单统计</legend>
         <div class="layui-field-box">
@@ -59,20 +72,20 @@
                                         <a href="javascript:;" class="x-admin-backlog-body">
                                             <h3>总金额(元)</h3>
                                             <p>
-                                                <cite>{{money.total}}</cite></p>
+                                                <cite>{{string_money.total}}</cite></p>
                                         </a>
                                     </li>
                                     <li class="layui-col-xs4">
                                         <a href="javascript:;" class="x-admin-backlog-body">
                                             <h3>已付款(元)</h3>
-                                            <p><cite>{{money.pay}}</cite></p>
+                                            <p><cite>{{string_money.pay}}</cite></p>
                                         </a>
                                     </li>
                                     <li class="layui-col-xs4">
                                         <a href="javascript:;" class="x-admin-backlog-body">
                                             <h3>未付款(元)</h3>
                                             <p>
-                                                <cite>{{money.un_pay}}</cite></p>
+                                                <cite>{{string_money.un_pay}}</cite></p>
                                         </a>
                                     </li>
                                 </ul>
@@ -83,7 +96,152 @@
             </div>
         </div>
     </fieldset>
+    <div class="layui-col-md6 " style="border-style: solid; border-width: 1px">
+        <div class="layui-card" >
+            <div class="layui-card-header" style="text-align: center">近7天订单情况</div>
+            <div class="layui-card-body">
+                <div id="order-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md6" style="border-style: solid; border-width: 1px">
+        <div class="layui-card" >
+            <div class="layui-card-header" style="text-align: center">整体销售情况</div>
+            <div class="layui-card-body">
+                <div id="pay-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var orderChart = echarts.init(document.getElementById('order-chart'));
+    var  order = {{order | safe}}
+    option = {
+        title: {
+            text: '日订单',
+            left: 'left'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['订单']
+        },
+        grid: {
+            left: '5%',
+            right: '8%',
+            bottom: '3%',
+            containLabel: true
+        },
+        feature: {
+            dataZoom: {
+                yAxisIndex: 'none'
+            },
+            dataView: {readOnly: false},
+            magicType: {type: ['line', 'bar']},
+            restore: {},
+            saveAsImage: {}
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: order['x_axis'],
+            name: '日期',
+            nameTextStyle: 'normal',
+            axisLine: {
+                lineStyle: {
+                    width: 4,
+                    color: '#000'
+                }
+            }
+        },
+        yAxis: {
+            name: '订单数',
+            type: 'value',
+            axisLine: {
+                lineStyle: {
+                    width: 4,
+                    color: '#99CCFF'
+                }
+            }
+        },
+        series: [
+            {
+                name: '订单',
+                type: 'line',
+                // stack: '总量',
+                data: order['y_axis'],
+                markPoint: {
+                data: [
+                    {type: 'max', name: '最大值'},
+                    {type: 'min', name: '最小值'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: '平均值'},
+                    [{
+                        symbol: 'none',
+                        x: '90%',
+                        yAxis: 'max'
+                    }, {
+                        symbol: 'circle',
+                        label: {
+                            position: 'start',
+                            formatter: '最大值'
+                        },
+                        type: 'max',
+                        name: '最高点'
+                    }]
+                ]
+            }
+            }
+        ]
+    };
+    orderChart.setOption(option);
+    var payChart = echarts.init(document.getElementById('pay-chart'));
+    var pay = {{num_money | safe}}
+    option = {
+    title: {
+        text: '销售金额:￥'+ pay['total'] + "元",
+        left: 'left'
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b} : {c} ({d}%)'
+    },
+    legend: {
+        orient: 'vertical',
+        left: 'right',
+        data: ['已付款金额:￥' + pay['pay'] + "元", '未付款金额:￥' + pay['un_pay'] + "元", "aa"]
+    },
+    series: [
+        {
+            name: '销售金额',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '60%'],
+            data: [
+                {value: pay['pay'], name: '已付款金额:￥' + pay['pay'] + "元"},
+                {value: pay['un_pay'], name: '未付款金额:￥' + pay['un_pay'] + "元"}
+            ],
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        }
+    ]
+};
+    payChart.setOption(option);
+
+    function refresh() {
+        location.reload()
+    }
+</script>
 
 {% endblock %}

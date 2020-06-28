@@ -1,6 +1,11 @@
 import datetime
+import json
+import time
 from functools import wraps
 from io import BytesIO
+
+import sqlalchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash
 
 from app.admin.forms import Login, ResetPassword, GuestForm, GuestSearch, GoodsTypeSearch, GoodsTypeForm, \
@@ -11,7 +16,8 @@ from flask import render_template, make_response, session, redirect, url_for, re
 from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX
 from app.models import User, Guest, GoodsType, TypeItem, Order
-from app.src.compute import home_order_statistics, home_money_statistics
+from app.src.compute import home_order_statistics, compute_order_num_statistics, \
+    money_statistics, num_money_statistics, string_money_statistics
 from app.utils.doc import admin_login_req
 
 
@@ -278,7 +284,7 @@ def order(page=None):
     form = OrderSearch()
     page = page if page is not None else 1
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
-    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Guest.user_name)\
+    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Guest.user_name) \
         .join(Guest, Guest.user_id == Order.guest_id)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
@@ -306,8 +312,16 @@ def index():
 @admin.route("/workPlatform/")
 @admin_login_req
 def workPlatform():
-    money_info = home_money_statistics()
-    return render_template("admin/workPlatform.html", name=session["admin"], orders=home_order_statistics(), money=money_info)
+    money_info = money_statistics()
+
+    result = compute_order_num_statistics(days=7)
+    order_info = {
+        'x_axis': [k for k, _ in result],
+        'y_axis': [v for _, v in result],
+    }
+    return render_template("admin/workPlatform.html", name=session["admin"], orders=home_order_statistics(),
+                           string_money=string_money_statistics(money_info), order=order_info,
+                           num_money=num_money_statistics(money_info))
 
 
 # 退出
@@ -386,3 +400,20 @@ def del_type_item():
         db.session.close()
         print("del error, error info:", e)
     return "success"
+
+
+@admin.route("/order_statistics/")
+@admin_login_req
+def order_statistics():
+    end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    order_query = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'),
+                                   func.count(Order.id))
+    base_timestamp = time.mktime(time.strptime(end_time, "%Y-%m-%d %H:%M:%S"))
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(base_timestamp - 7 * 24 * 60 * 60))
+    order_query = order_query.filter(Order.add_time < end_time, Order.add_time > start_time).group_by(
+        func.date_format(Order.add_time, '%Y-%m-%d')) \
+        .order_by(sqlalchemy.asc('order_date'))
+    order_data = order_query.all()
+    y_axis = [i for _, i in order_data]
+    x_axis = [j for j, _ in order_data]
+    return render_template('admin/statistics.html', order=json.dumps({'x_axis': x_axis, 'y_axis': y_axis}))

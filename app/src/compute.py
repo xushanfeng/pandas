@@ -6,6 +6,7 @@ from sqlalchemy import func
 from app.apps import db
 from app.models import Order, Guest
 
+
 def user_statistics(guest_name=None, order_no=None, start_time=None, end_time=None):
     if not guest_name and not order_no:
         return {
@@ -53,22 +54,18 @@ def compute_order_statistics(start_time=None, end_time=None):
     }
 
 
-def compute_order_num_statistics(start_time=None, end_time=None):
+def compute_order_num_statistics(start_time=None, end_time=None, days=30):
     end_time = end_time if end_time else time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     order_query = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'),
                                    func.count(Order.id))
     if not start_time:
         base_timestamp = time.mktime(time.strptime(end_time, "%Y-%m-%d %H:%M:%S"))
-        start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(base_timestamp - 30 * 24 * 60 * 60))
+        start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(base_timestamp - days * 24 * 60 * 60))
     order_query = order_query.filter(Order.add_time < end_time, Order.add_time > start_time).group_by(
         func.date_format(Order.add_time, '%Y-%m-%d')) \
-        .order_by(sqlalchemy.desc('order_date'))
+        .order_by(sqlalchemy.asc('order_date'))
     order_data = order_query.all()
-    result = {}
-    if any(order_data):
-        for i in order_data:
-            result[i[0]] = i[1]
-    return result
+    return order_data
 
 
 def home_order_statistics():
@@ -84,13 +81,25 @@ def home_order_statistics():
     return {"current": today_order_data[0][0], "this_week": week_order_data[0][0], "this_month": month_order_data[0][0]}
 
 
-def home_money_statistics():
+def money_statistics():
     end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     base_query = db.session.query(func.sum(Order.total), func.sum(Order.pay), func.sum(Order.unpay)) \
         .join(Guest, Order.guest_id == Guest.user_id).filter(Order.add_time < end_time)
     page_data = base_query.order_by(Guest.user_id.desc()).all()
+    return page_data
+
+
+def string_money_statistics(page_data):
     return {
         "total": '￥{:0,.2f}'.format(page_data[0][0]),
         "pay": '￥{:0,.2f}'.format(page_data[0][1]),
         "un_pay": '￥{:0,.2f}'.format(page_data[0][2])
+    }
+
+
+def num_money_statistics(page_data):
+    return {
+        "total": round(page_data[0][0], 2),
+        "pay": round(page_data[0][1], 2),
+        "un_pay": round(page_data[0][2], 2)
     }
