@@ -1,5 +1,6 @@
 import time
 
+import sqlalchemy
 from sqlalchemy import func
 
 from app.apps import db
@@ -51,3 +52,28 @@ def compute_order_statistics(start_time=None, end_time=None):
         "unpay": order_data[0][2],
         "total_order": order_data[0][3],
     }
+
+
+def compute_order_num_statistics(start_time=None, end_time=None):
+    end_time = end_time if end_time else time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    order_query = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'), func.count(Order.id)) \
+
+    if not start_time:
+        base_timestamp = time.mktime(time.strptime(end_time, "%Y-%m-%d %H:%M:%S"))
+        start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(base_timestamp - 30 * 24 * 60 * 60))
+    order_query = order_query.filter(Order.add_time < end_time, Order.add_time > start_time).group_by(func.date_format(Order.add_time, '%Y-%m-%d'))\
+        .order_by(sqlalchemy.desc('order_date'))
+    order_data = order_query.all()
+    result = {}
+    if any(order_data):
+        for i in order_data:
+            result[i[0]] = i[1]
+    return result
+
+    # print(order_data)
+    # return {
+    #     "total": order_data[0][0],
+    #     "pay": order_data[0][1],
+    #     "unpay": order_data[0][2],
+    #     "total_order": order_data[0][3],
+    # }

@@ -9,10 +9,9 @@ from app.apps import db
 from app.data_template.data_template import print_template
 from app.interface import inter
 from app.models import GoodsType, TypeItem, Order, OrderDetail, Guest
-from app.src.compute import user_statistics, compute_order_statistics
+from app.src.compute import user_statistics, compute_order_statistics, compute_order_num_statistics
 from app.utils.base_res import base_success_res, base_fail_res
 from app.utils.doc import admin_login_req
-
 
 
 @inter.route("/add_order", methods=['POST'])
@@ -247,6 +246,17 @@ def order_statistics():
     start_time = request.args.get('start_time', '')
     end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     result = compute_order_statistics(start_time, end_time)
+    #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
+    return jsonify(base_success_res(result)) if result.get('result_code') != 'error' else jsonify(result)
+
+
+@inter.route("/order_num_statistics", methods=['GET'])
+# @admin_login_req
+def order_num_statistics():
+    start_time = request.args.get('start_time', '')
+    base_timestamp = time.time()
+    end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    result = compute_order_num_statistics(start_time, end_time)
     #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
     return jsonify(base_success_res(result)) if result.get('result_code') != 'error' else jsonify(result)
 
