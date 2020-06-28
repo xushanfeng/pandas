@@ -1,3 +1,4 @@
+import datetime
 from functools import wraps
 from io import BytesIO
 from werkzeug.security import generate_password_hash
@@ -10,6 +11,7 @@ from flask import render_template, make_response, session, redirect, url_for, re
 from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX
 from app.models import User, Guest, GoodsType, TypeItem, Order
+from app.src.compute import home_order_statistics, home_money_statistics
 from app.utils.doc import admin_login_req
 
 
@@ -304,11 +306,8 @@ def index():
 @admin.route("/workPlatform/")
 @admin_login_req
 def workPlatform():
-    # purchases = len(Purchase.query.all())
-    # saless = len(sales.query.all())
-    # warehouses = len(warehouse.query.all())
-    names = {"purchases": 2, "saless": 2, "warehouses": 1}
-    return render_template("admin/workPlatform.html", name=session["admin"], names=names)
+    money_info = home_money_statistics()
+    return render_template("admin/workPlatform.html", name=session["admin"], orders=home_order_statistics(), money=money_info)
 
 
 # 退出

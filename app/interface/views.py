@@ -254,7 +254,6 @@ def order_statistics():
 # @admin_login_req
 def order_num_statistics():
     start_time = request.args.get('start_time', '')
-    base_timestamp = time.time()
     end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     result = compute_order_num_statistics(start_time, end_time)
     #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框

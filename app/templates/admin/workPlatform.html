@@ -6,7 +6,83 @@
 <div class="x-body layui-anim layui-anim-up">
     <blockquote class="layui-elem-quote">欢迎你：
         <span class="x-red">登录本系统</span></blockquote>
-
+    <fieldset class="layui-elem-field">
+        <legend>订单统计</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                             lay-arrow="none" style="width: 100%; height: 90px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>当日订单量</h3>
+                                            <p>
+                                                <cite>{{orders.current}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>本周订单量</h3>
+                                            <p>
+                                                <cite>{{orders.this_week}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>本月订单量</h3>
+                                            <p>
+                                                <cite>{{orders.this_month}}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field">
+        <legend>款项统计</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                             lay-arrow="none" style="width: 100%; height: 90px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs4">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>总金额(元)</h3>
+                                            <p>
+                                                <cite>{{money.total}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs4">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>已付款(元)</h3>
+                                            <p><cite>{{money.pay}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs4">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>未付款(元)</h3>
+                                            <p>
+                                                <cite>{{money.un_pay}}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
 </div>
 
 
