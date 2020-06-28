@@ -10,15 +10,11 @@
         <span class="x-red">登录本系统</span>
         </blockquote>
     </div>
-
     <div class="layui-col-md6">
         <blockquote class="layui-elem-quote">
             <button onclick="refresh()">刷新</button>
         </blockquote>
-
     </div>
-
-
     <fieldset class="layui-elem-field">
         <legend>订单统计</legend>
         <div class="layui-field-box">
@@ -86,6 +82,96 @@
                                             <h3>未付款(元)</h3>
                                             <p>
                                                 <cite>{{string_money.un_pay}}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field">
+        <legend>用户数据统计</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                             lay-arrow="none" style="width: 100%; height: 90px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>订单最多的用户</h3>
+                                            <p>
+                                                <cite>{{user_dimension.order_guest_name}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>订单数</h3>
+                                            <p><cite>{{user_dimension.order_num}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>待付款最多的用户</h3>
+                                            <p>
+                                                <cite>{{user_dimension.financial_guest_name}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>未付款金额(元)</h3>
+                                            <p>
+                                                <cite>{{user_dimension.financial_unpay}}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="layui-elem-field">
+        <legend>订单数据统计</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                             lay-arrow="none" style="width: 100%; height: 90px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>金额最大的订单</h3>
+                                            <p>
+                                                <cite>{{order_dimension.max_money_order_no}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>订单金额</h3>
+                                            <p><cite>{{order_dimension.max_money_order_pay}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>最多订单的日期</h3>
+                                            <p>
+                                                <cite>{{order_dimension.most_order_date}}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs3">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>订单数</h3>
+                                            <p>
+                                                <cite>{{order_dimension.most_order_date_num}}</cite></p>
                                         </a>
                                     </li>
                                 </ul>

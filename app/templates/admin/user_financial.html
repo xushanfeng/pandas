@@ -1,0 +1,44 @@
+{% extends "admin/bases.html" %}
+{% import "admin/fy.html" as pg %}
+
+{% block content %}
+
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" method="post">
+            {{form.name}}
+            {{form.phone}}
+            {{form.csrf_token}}
+            {{form.submit}}
+        </form>
+    </div>
+
+    <xblock>
+        <button class="layui-btn" onclick="x_admin_show('添加客户','{{url_for("admin.add_guest")}}','1150','450')">添加客户</button>
+    </xblock>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>客户姓名</th>
+            <th>总金额</th>
+            <th>已付金额</th>
+            <th>未付金额</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for i in page_data.items %}
+        <tr>
+            <td>{{i.user_name}}</td>
+            <td>{{i.user_phone}}</td>
+            <td>{{i.addr}}</td>
+            <td>{{i.addr}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {{pg.page(page_data,'admin.guests')}}
+
+</div>
+
+{% endblock %}

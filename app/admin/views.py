@@ -17,7 +17,8 @@ from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX, CLOSE_WIN
 from app.models import User, Guest, GoodsType, TypeItem, Order
 from app.src.compute import home_order_statistics, compute_order_num_statistics, \
-    money_statistics, num_money_statistics, string_money_statistics
+    money_statistics, num_money_statistics, string_money_statistics, user_dimension_statistics, \
+    order_dimension_statistics
 from app.utils.doc import admin_login_req
 
 
@@ -278,10 +279,13 @@ def order(page=None):
     form = OrderSearch()
     page = page if page is not None else 1
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
+    order_no = str(form.data.get('order_no')).strip() if form.data.get('order_no') else None
     order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Guest.user_name) \
         .join(Guest, Guest.user_id == Order.guest_id)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
+    if order_no:
+        order_query = order_query.filter(Order.order_no.like('%{}%'.format(order_no)))
     page_data = order_query.order_by(Order.id.desc()).paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/order.html", form=form, page_data=page_data)
 
@@ -307,7 +311,8 @@ def index():
 @admin_login_req
 def workPlatform():
     money_info = money_statistics()
-
+    user_dimension = user_dimension_statistics()
+    order_dimension = order_dimension_statistics()
     result = compute_order_num_statistics(days=7)
     order_info = {
         'x_axis': [k for k, _ in result],
@@ -315,7 +320,8 @@ def workPlatform():
     }
     return render_template("admin/workPlatform.html", name=session["admin"], orders=home_order_statistics(),
                            string_money=string_money_statistics(money_info), order=order_info,
-                           num_money=num_money_statistics(money_info))
+                           num_money=num_money_statistics(money_info), user_dimension=user_dimension,
+                           order_dimension=order_dimension)
 
 
 # 退出
@@ -411,3 +417,20 @@ def order_statistics():
     y_axis = [i for _, i in order_data]
     x_axis = [j for j, _ in order_data]
     return render_template('admin/statistics.html', order=json.dumps({'x_axis': x_axis, 'y_axis': y_axis}))
+
+
+# 客户管理
+@admin.route("/user_financial/<int:page>", methods=["GET", "POST"])
+@admin_login_req
+def user_financial(page=None):
+    form = GuestSearch()
+    page = page if page is not None else 1
+    guest_query = Guest.query.order_by(Guest.user_id.desc()).filter(Guest.status == 1)
+    name = str(form.data.get('name')).strip() if form.data.get('name') else None
+    phone = str(form.data.get('phone')).strip() if form.data.get('phone') else None
+    if name:
+        guest_query = guest_query.filter(Guest.user_name.like('%{}%'.format(name)))
+    if form.data.get('phone'):
+        guest_query = guest_query.filter(Guest.user_phone.like('%{}%'.format(phone)))
+    page_data = guest_query.filter().paginate(page=page, per_page=PAGE_LIMIT)
+    return render_template("admin/user_financial.html", form=form, page_data=page_data)

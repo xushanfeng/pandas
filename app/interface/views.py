@@ -24,7 +24,7 @@ def add_order():
         total_pay = 0
         if not order_id:
             order = Order(
-                order_no=time.strftime("%y%m%d%H%M%s", time.localtime()),
+                order_no=time.strftime("%Y%m%d%H%M%S", time.localtime()),
                 guest_id=request_json.get("guest_id"),
                 total=request_json.get("total"),
                 pay=request_json.get("pay"),
