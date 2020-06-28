@@ -295,6 +295,12 @@ def add_order():
     types = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).all()
     return render_template("admin/add_order.html", guests=guests, types=types, type_items=typeItems)
 
+# 预览
+@admin.route("/order_print/", methods=["GET"])
+def order_print():
+    """订单打印"""
+    return render_template("admin/print.html")
+
 
 # 首页
 @admin.route("/")

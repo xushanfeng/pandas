@@ -206,7 +206,9 @@ function mesg(message) {
 }
 
 function showMessage(message) {
-    layer.msg(message || '添加成功!', {icon: 1, time: 3000});
+    layui.use('layer', function() {
+        layer.msg(message || '添加成功!', {icon: 1, time: 3000});
+    });
 }
 
 function getParams(query) {
