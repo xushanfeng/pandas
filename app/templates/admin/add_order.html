@@ -83,15 +83,15 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">未付款(元)</label>
+            <label class="layui-form-label">已付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required type="text">
+                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">已付款(元)</label>
+            <label class="layui-form-label">未付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="" required="" type="text" readonly>
+                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required readonly type="text">
             </div>
         </div>
         <div class="layui-form-item">
@@ -273,7 +273,7 @@ function calTotal() {
         return item.unit == 1 ? math.multiply(item.num, item.price, item.length) : math.multiply(item.num, item.price);
     }).reduce(function(prev, next) {
         return prev + next;
-    }, 0)
+    }, 0).toFixed(2);
     $('#total').val(total);
 }
 function getOrder() {
@@ -296,15 +296,15 @@ function getOrder() {
     }
 }
 
-$('#unpay').on('input', function(e) {
+$('#pay').on('input', function(e) {
     var total = $('#total').val();
-    var unpay = $('#unpay').val();
-    if(isNaN(unpay)) {
+    var pay = $('#pay').val();
+    if(isNaN(pay)) {
         showMessage('请填写数字');
         
     } else {
-        var pay = math.subtract(total, unpay);
-        $('#pay').val(pay);
+        var unpay = math.subtract(total, pay);
+        $('#unpay').value(unpay);
     }
 });
 
