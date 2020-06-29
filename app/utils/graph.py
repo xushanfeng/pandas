@@ -28,8 +28,6 @@ def line_chart(end_time=None, start_time=None):
     order_data = order_query.all()
     attr = [i for _, i in order_data]
     v1 = [j for j, _ in order_data]
-    print(attr)
-    print(v1)
     line = Line("近30天订单统计")
     line.add("", v1, attr, is_stack=True, is_smooth=True, is_fill=True)
     return line
