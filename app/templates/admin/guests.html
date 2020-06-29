@@ -22,6 +22,7 @@
         <tr>
             <th>客户姓名</th>
             <th>手机号码</th>
+            <th>邮箱</th>
             <th>地区</th>
             <th>操作</th>
         </tr>
@@ -31,6 +32,7 @@
         <tr>
             <td>{{i.user_name}}</td>
             <td>{{i.user_phone}}</td>
+            <td>{{i.user_mail}}</td>
             <td>{{i.addr}}</td>
             <td class="td-manage">
                 <a title="编辑" onclick="x_admin_show('保存客户','{{url_for("admin.add_guest", edit=True, user_id=i.user_id)}}','1150','450')">

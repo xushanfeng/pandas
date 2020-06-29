@@ -327,6 +327,7 @@ class TypeItemSearch(FlaskForm):
 class TypeItemForm(FlaskForm):
     id = None
     good_types = GoodsType.query.filter(GoodsType.status == 1).all()
+    print(good_types)
     type_name = SelectField(
         label="请选择类型",
         validators=[

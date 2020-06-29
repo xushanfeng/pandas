@@ -282,7 +282,7 @@ def order(page=None):
     page = page if page is not None else 1
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
     order_no = str(form.data.get('order_no')).strip() if form.data.get('order_no') else None
-    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Guest.user_name) \
+    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,Order.description, Guest.user_name) \
         .join(Guest, Guest.user_id == Order.guest_id)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
@@ -434,7 +434,8 @@ def order_statistics():
 def user_financial(page=None):
     form = FinancialSearch()
     page = page if page is not None else 1
-    financial_query = db.session.query(Guest.user_name, Guest.user_phone, func.sum(Order.total).label('total'),
+    financial_query = db.session.query(Guest.user_name, Guest.user_phone,
+                                       func.round(func.sum(Order.total), 2).label('total'),
                                        func.sum(Order.pay).label('pay'),
                                        func.sum(Order.unpay).label('unpay')).join(Guest,
                                                                                   Guest.user_id == Order.guest_id)

@@ -14,8 +14,7 @@
         </form>
     </div>
 
-<!--    <a class="layui-btn" href="{{url_for("admin.add_order")}}">添加订单</a>-->
-    <a class="layui-btn" onclick="x_admin_show('添加客户','{{url_for("admin.add_order")}}','1150','450')">添加订单</a>
+    <a class="layui-btn" onclick="x_admin_show('添加订单','{{url_for("admin.add_order")}}','1150','450')">添加订单</a>
     <table class="layui-table">
         <thead>
         <tr>
@@ -39,13 +38,10 @@
             <td>{{i.description}}</td>
 
             <td class="td-manage">
-                <a title="详情" >
-                    <i class="layui-icon">&#xe705;</i>
-                </a>
-                <a title="编辑" onclick="x_admin_show('添加客户','{{url_for("admin.add_order",edit=True, order_no=i.order_no)}}','1150','450')">
+                <a title="编辑" onclick="x_admin_show('编辑订单','{{url_for("admin.add_order",edit=True, order_no=i.order_no)}}','1150','450')">
                     <i class="layui-icon">&#xe642;</i>
                 </a>
-                <a title="打印" onclick="x_admin_show('添加客户','{{url_for("admin.order_print",order_id=i.id)}}','1150','450')">
+                <a title="打印" onclick="x_admin_show('打印订单','{{url_for("admin.order_print",order_id=i.id)}}','1150','450')">
                     <i class="layui-icon">&#xe66d;</i>
                 </a>
             </td>

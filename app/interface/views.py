@@ -189,18 +189,18 @@ def types():
 
 
 @inter.route("/type_items", methods=['GET'])
-@admin_login_req
+# @admin_login_req
 def type_items():
     type_id = str(request.args.get('type_id', ''))
     item_id = str(request.args.get('item_id', ''))
-    base_query = TypeItem.query.filter(GoodsType.status == 1, TypeItem.status == 1)
+    base_query = TypeItem.query.filter(TypeItem.status == 1)
     if type_id:
         base_query = base_query.filter(TypeItem.goods_type_id == type_id)
     if item_id:
         base_query = base_query.filter(TypeItem.item_id == item_id)
-    page_data = base_query.order_by(GoodsType.id.desc()).all()
+    page_data = base_query.order_by(TypeItem.id.desc()).all()
     if not page_data:
-        return base_success_res({"items": []})
+        return jsonify(base_success_res({"items": []}))
     #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
     return jsonify(base_success_res(
         {"items": [{"id": _.id, "item_name": _.item_name, "type_id": _.goods_type_id, "unit": _.unit} for _ in

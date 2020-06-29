@@ -149,14 +149,14 @@
                                 <ul class="layui-row layui-col-space10 layui-this">
                                     <li class="layui-col-xs3">
                                         <a href="javascript:;" class="x-admin-backlog-body">
-                                            <h3>金额最大的订单</h3>
+                                            <h3>金额最大的订单号</h3>
                                             <p>
                                                 <cite>{{order_dimension.max_money_order_no}}</cite></p>
                                         </a>
                                     </li>
                                     <li class="layui-col-xs3">
                                         <a href="javascript:;" class="x-admin-backlog-body">
-                                            <h3>订单金额</h3>
+                                            <h3>订单金额(元)</h3>
                                             <p><cite>{{order_dimension.max_money_order_pay}}</cite></p>
                                         </a>
                                     </li>
@@ -182,22 +182,29 @@
             </div>
         </div>
     </fieldset>
-    <div class="layui-col-md6 " style="border-style: solid; border-width: 1px">
-        <div class="layui-card" >
-            <div class="layui-card-header" style="text-align: center">近7天订单情况</div>
-            <div class="layui-card-body">
-                <div id="order-chart" style="width: 100%; height: 400px;"></div>
+
+    <fieldset class="layui-elem-field">
+        <legend>统计分析</legend>
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside"
+                             lay-arrow="none">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs6 x-admin-backlog-body" style="background-color: #ffffff">
+                                        <div class="layui-col-xs5" id="order-chart" style="width: 80%; height: 400px;"></div>
+                                    </li>
+                                    <li class="layui-col-xs6 x-admin-backlog-body">
+                                        <div id="pay-chart" style="width: 100%; height: 400px;"></div>
+                                    </li>
+                                </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="layui-col-md6" style="border-style: solid; border-width: 1px">
-        <div class="layui-card" >
-            <div class="layui-card-header" style="text-align: center">整体销售情况</div>
-            <div class="layui-card-body">
-                <div id="pay-chart" style="width: 100%; height: 400px;"></div>
-            </div>
-        </div>
-    </div>
+    </fieldset>
 </div>
 
 <script type="text/javascript">
@@ -217,7 +224,7 @@
         },
         grid: {
             left: '5%',
-            right: '8%',
+            right: '10%',
             bottom: '3%',
             containLabel: true
         },
@@ -238,8 +245,8 @@
             nameTextStyle: 'normal',
             axisLine: {
                 lineStyle: {
-                    width: 4,
-                    color: '#000'
+                    width: 2,
+                    color: '#009688'
                 }
             }
         },
@@ -248,8 +255,8 @@
             type: 'value',
             axisLine: {
                 lineStyle: {
-                    width: 4,
-                    color: '#99CCFF'
+                    width: 2,
+                    color: '#009688'
                 }
             }
         },
@@ -260,29 +267,36 @@
                 // stack: '总量',
                 data: order['y_axis'],
                 markPoint: {
-                data: [
-                    {type: 'max', name: '最大值'},
-                    {type: 'min', name: '最小值'}
-                ]
-            },
-            markLine: {
-                data: [
-                    {type: 'average', name: '平均值'},
-                    [{
-                        symbol: 'none',
-                        x: '90%',
-                        yAxis: 'max'
-                    }, {
-                        symbol: 'circle',
-                        label: {
-                            position: 'start',
-                            formatter: '最大值'
-                        },
-                        type: 'max',
-                        name: '最高点'
-                    }]
-                ]
-            }
+                    data: [
+                        {type: 'max', name: '最大值'},
+                        {type: 'min', name: '最小值'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'},
+                        [{
+                            symbol: 'circle',
+                            x: '90%',
+                            yAxis: 'max',
+                            label: {
+                                color:'#009688'
+                            }
+                        }, {
+                            symbol: 'circle',
+                            label: {
+                                position: 'start',
+                                formatter: '最大值'
+                            },
+                            type: 'max',
+                            name: '最高点'
+                        }]
+                    ]
+                },
+                lineStyle:{
+                    color: '#009688',
+                    width: 2
+                }
             }
         ]
     };
@@ -290,39 +304,39 @@
     var payChart = echarts.init(document.getElementById('pay-chart'));
     var pay = {{num_money | safe}}
     option = {
-    title: {
-        text: '销售金额:￥'+ pay['total'] + "元",
-        left: 'left'
-    },
-    tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)'
-    },
-    legend: {
-        orient: 'vertical',
-        left: 'right',
-        data: ['已付款金额:￥' + pay['pay'] + "元", '未付款金额:￥' + pay['un_pay'] + "元", "aa"]
-    },
-    series: [
-        {
-            name: '销售金额',
-            type: 'pie',
-            radius: '55%',
-            center: ['50%', '60%'],
-            data: [
-                {value: pay['pay'], name: '已付款金额:￥' + pay['pay'] + "元"},
-                {value: pay['un_pay'], name: '未付款金额:￥' + pay['un_pay'] + "元"}
-            ],
-            emphasis: {
-                itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+        title: {
+            text: '销售金额:￥' + pay['total'] + "元",
+            left: 'left'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'right',
+            data: ['已付款金额:￥' + pay['pay'] + "元", '未付款金额:￥' + pay['un_pay'] + "元", "aa"]
+        },
+        series: [
+            {
+                name: '销售金额',
+                type: 'pie',
+                radius: '45%',
+                center: ['50%', '60%'],
+                data: [
+                    {value: pay['pay'], name: '已付款金额:￥' + pay['pay'] + "元"},
+                    {value: pay['un_pay'], name: '未付款金额:￥' + pay['un_pay'] + "元"}
+                ],
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: '#009688'
+                    }
                 }
             }
-        }
-    ]
-};
+        ]
+    };
     payChart.setOption(option);
 
     function refresh() {
