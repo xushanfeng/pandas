@@ -23,12 +23,6 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">已付款(元)</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text" readonly>
-            </div>
-        </div>
-        <div class="layui-form-item">
             <div class="layui-form-label">订单明细</div>
             <div class="layui-input-block">
                 <table class="layui-table" id="detail">
@@ -83,15 +77,21 @@
             </div>
         </div>
         <div class="layui-form-item">
+            <label class="layui-form-label">订单总价(元)</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="total" lay-verify="required" name="total" placeholder="" required="" type="text" readonly>
+            </div>
+        </div>
+        <div class="layui-form-item">
             <label class="layui-form-label">未付款(元)</label>
             <div class="layui-input-block">
                 <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required type="text">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">订单总价(元)</label>
+            <label class="layui-form-label">已付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="total" lay-verify="required" name="total" placeholder="请输入单位" required="" type="text" readonly>
+                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="" required="" type="text" readonly>
             </div>
         </div>
         <div class="layui-form-item">
@@ -270,7 +270,7 @@ function addItem() {
 }
 function calTotal() {
     var total = order.details.map(function(item) {
-        return math.multiply(item.num, item.price);
+        return item.unit == 1 ? math.multiply(item.num, item.price, item.length) : math.multiply(item.num, item.price);
     }).reduce(function(prev, next) {
         return prev + next;
     }, 0)
