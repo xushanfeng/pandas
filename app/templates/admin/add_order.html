@@ -2,7 +2,7 @@
 
 
 {% block content %}
-
+<script src="{{url_for('static',filename='js/math.min.js')}}" charset="utf-8"></script>
 <div class="x-body">
     <form class="layui-form" action="" method="post" id="order-form">
         <div class="layui-form-item">
@@ -23,21 +23,9 @@
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">订单总价(元)</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="total" lay-verify="required" name="total" placeholder="请输入单位" required="" type="text">
-            </div>
-        </div>
-        <div class="layui-form-item">
             <label class="layui-form-label">已付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">未付款(元)</label>
-            <div class="layui-input-block">
-                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required type="text" readonly>
+                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text" readonly>
             </div>
         </div>
         <div class="layui-form-item">
@@ -92,6 +80,18 @@
                         <td><button class="layui-btn" onclick="addItem()" type="button">添加</button></td>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">未付款(元)</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="unpay" lay-verify="required" name="unpay" placeholder="未付款金额" required type="text">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">订单总价(元)</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="total" lay-verify="required" name="total" placeholder="请输入单位" required="" type="text" readonly>
             </div>
         </div>
         <div class="layui-form-item">
@@ -236,6 +236,11 @@ function addItem() {
         return;
     }
 
+    if(isNaN(num) || isNaN(price)) {
+        showMessage('请填写数字');
+        return;
+    }
+
     var unit = $('#unit').val();
     var length = $('#length').val();
     if(unit == 1 && !length) {
@@ -254,6 +259,7 @@ function addItem() {
     };
     length && (data.length = length);
     appendItem(data);
+    calTotal();
     $('#types').val('');
     $('#type_items').val('');
     $('#price').val('');
@@ -262,7 +268,14 @@ function addItem() {
     $('#length').val('');
     renderForm();
 }
-
+function calTotal() {
+    var total = order.details.map(function(item) {
+        return math.multiply(item.num, item.price);
+    }).reduce(function(prev, next) {
+        return prev + next;
+    }, 0)
+    $('#total').val(total);
+}
 function getOrder() {
     var params = getParams(location.search.substr(1));
     var url;
@@ -283,14 +296,17 @@ function getOrder() {
     }
 }
 
-$('#total, #pay').on('input', function(e) {
+$('#unpay').on('input', function(e) {
     var total = $('#total').val();
-    var pay = $('#pay').val();
-    if(total && pay) {
-        $('#unpay').val(total - pay);
+    var unpay = $('#unpay').val();
+    if(isNaN(unpay)) {
+        showMessage('请填写数字');
+        
+    } else {
+        var pay = math.subtract(total, unpay);
+        $('#pay').val(pay);
     }
 });
-
 
 $('#detail').on('click', '.btn-delete', function(e) {
     var $this = $(this);
