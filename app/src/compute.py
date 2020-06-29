@@ -70,7 +70,7 @@ def compute_order_num_statistics(start_time=None, end_time=None, days=30):
 
 def home_order_statistics():
     today = datetime.date.today()
-    this_week_first = today - datetime.timedelta(days=today.weekday() + 7)
+    this_week_first = today-datetime.timedelta(days=today.weekday())
     this_month_first = datetime.date(today.year, today.month, 1)
     today_order_data = db.session.query(func.count(Order.id)).filter(
         Order.add_time >= '{} 00:00:00'.format(today)).all()

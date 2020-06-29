@@ -6,6 +6,7 @@
 <div class="x-body">
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so" method="post">
+            {{form.type_name}}
             {{form.name}}
             {{form.csrf_token}}
             {{form.submit}}
@@ -19,8 +20,8 @@
     <table class="layui-table">
         <thead>
         <tr>
-            <th>类型规格</th>
             <th>所属类型</th>
+            <th>类型规格</th>
             <th>描述</th>
             <th>操作</th>
         </tr>
@@ -28,10 +29,9 @@
         <tbody>
         {% for i in page_data.items %}
         <tr>
-            <td>{{i.item_name}}</td>
             <td>{{i.name}}</td>
+            <td>{{i.item_name}}</td>
             <td>{{i.description}}</td>
-
             <td class="td-manage">
                 <a title="编辑" onclick="x_admin_show('添加类型','{{url_for("admin.add_type_item", edit=True, id=i.id)}}','1150','450')">
                     <i class="layui-icon">&#xe642;</i>

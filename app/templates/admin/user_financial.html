@@ -12,17 +12,14 @@
             {{form.submit}}
         </form>
     </div>
-
-    <xblock>
-        <button class="layui-btn" onclick="x_admin_show('添加客户','{{url_for("admin.add_guest")}}','1150','450')">添加客户</button>
-    </xblock>
     <table class="layui-table">
         <thead>
         <tr>
             <th>客户姓名</th>
-            <th>总金额</th>
-            <th>已付金额</th>
-            <th>未付金额</th>
+            <th>客户手机号</th>
+            <th>总金额(元)</th>
+            <th>已付金额(元)</th>
+            <th>未付金额(元)</th>
         </tr>
         </thead>
         <tbody>
@@ -30,14 +27,15 @@
         <tr>
             <td>{{i.user_name}}</td>
             <td>{{i.user_phone}}</td>
-            <td>{{i.addr}}</td>
-            <td>{{i.addr}}</td>
+            <td>{{i.total}}</td>
+            <td>{{i.pay}}</td>
+            <td>{{i.unpay}}</td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    {{pg.page(page_data,'admin.guests')}}
+    {{pg.page(page_data,'admin.user_financial')}}
 
 </div>
 

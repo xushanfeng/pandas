@@ -1,4 +1,3 @@
-import datetime
 import json
 import time
 from functools import wraps
@@ -9,7 +8,7 @@ from sqlalchemy import func
 from werkzeug.security import generate_password_hash
 
 from app.admin.forms import Login, ResetPassword, GuestForm, GuestSearch, GoodsTypeSearch, GoodsTypeForm, \
-    TypeItemSearch, TypeItemForm, OrderSearch
+    TypeItemSearch, TypeItemForm, OrderSearch, FinancialSearch
 from app.apps import db
 from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
@@ -210,10 +209,13 @@ def type_item(page=None):
     form = TypeItemSearch()
     page = page if page is not None else 1
     name = str(form.data.get('name')) if form.data.get('name') else None
+    type_name = str(form.data.get('type_name')) if form.data.get('type_name') else None
     item_query = db.session.query(TypeItem.id, TypeItem.item_name, TypeItem.description, TypeItem.goods_type_id,
                                   GoodsType.name).join(GoodsType, GoodsType.id == TypeItem.goods_type_id)
     if name:
         item_query = item_query.filter(TypeItem.item_name.like('%{}%'.format(name)))
+    if type_name:
+        item_query = item_query.filter(GoodsType.name.like('%{}%'.format(type_name)))
     page_data = item_query.filter(TypeItem.status == 1).order_by(TypeItem.id.desc()).paginate(page=page,
                                                                                               per_page=PAGE_LIMIT)
     return render_template("admin/type_items.html", form=form, page_data=page_data)
@@ -298,6 +300,7 @@ def add_order():
     typeItems = TypeItem.query.filter(GoodsType.status == 1, TypeItem.status == 1).all()
     types = GoodsType.query.filter(GoodsType.status == 1).order_by(GoodsType.id.desc()).all()
     return render_template("admin/add_order.html", guests=guests, types=types, type_items=typeItems)
+
 
 # 预览
 @admin.route("/order_print/", methods=["GET"])
@@ -429,14 +432,18 @@ def order_statistics():
 @admin.route("/user_financial/<int:page>", methods=["GET", "POST"])
 @admin_login_req
 def user_financial(page=None):
-    form = GuestSearch()
+    form = FinancialSearch()
     page = page if page is not None else 1
-    guest_query = Guest.query.order_by(Guest.user_id.desc()).filter(Guest.status == 1)
+    financial_query = db.session.query(Guest.user_name, Guest.user_phone, func.sum(Order.total).label('total'),
+                                       func.sum(Order.pay).label('pay'),
+                                       func.sum(Order.unpay).label('unpay')).join(Guest,
+                                                                                  Guest.user_id == Order.guest_id)
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
     phone = str(form.data.get('phone')).strip() if form.data.get('phone') else None
     if name:
-        guest_query = guest_query.filter(Guest.user_name.like('%{}%'.format(name)))
+        financial_query = financial_query.filter(Guest.user_name.like('%{}%'.format(name)))
     if form.data.get('phone'):
-        guest_query = guest_query.filter(Guest.user_phone.like('%{}%'.format(phone)))
-    page_data = guest_query.filter().paginate(page=page, per_page=PAGE_LIMIT)
+        financial_query = financial_query.filter(Guest.user_phone.like('%{}%'.format(phone)))
+    financial_query = financial_query.group_by(Guest.user_id).order_by(sqlalchemy.desc('total'))
+    page_data = financial_query.paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/user_financial.html", form=form, page_data=page_data)
