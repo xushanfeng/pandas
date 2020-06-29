@@ -1,11 +1,8 @@
-#-*- coding:utf-8 -*-
-# author:Agam
-# datetime:2018-11-05
 
 from app.home import home
-from flask import render_template
+from flask import redirect, url_for
 
 
 @home.route("/")
 def index():
-    return render_template("home/index.html")
+    return redirect(url_for('admin.login'))
