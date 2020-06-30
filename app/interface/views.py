@@ -15,7 +15,7 @@ from app.utils.doc import admin_login_req
 
 
 @inter.route("/add_order", methods=['POST'])
-# @admin_login_req
+@admin_login_req
 def add_order():
     try:
         request_data = request.get_data().decode('utf-8')
@@ -124,7 +124,7 @@ def add_order():
 
 
 @inter.route("/orders", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def orders():
     order_id = request.args.get('order_id')
     order_no = request.args.get('order_no')
@@ -174,7 +174,7 @@ def orders():
 
 
 @inter.route("/types", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def types():
     type_id = str(request.args.get('id', ''))
     if not type_id:
@@ -189,7 +189,7 @@ def types():
 
 
 @inter.route("/type_items", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def type_items():
     type_id = str(request.args.get('type_id', ''))
     item_id = str(request.args.get('item_id', ''))
@@ -208,7 +208,7 @@ def type_items():
 
 
 @inter.route("/guests", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def guests():
     guest_id = str(request.args.get('guest_id', ''))
     guest_name = str(request.args.get('guest_name', ''))
@@ -227,7 +227,7 @@ def guests():
 
 
 @inter.route("/user_pay_statistics", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def user_pay_statistics():
     guest_name = str(request.args.get('name', ''))
     order_no = str(request.args.get('order_no', ''))
@@ -241,7 +241,7 @@ def user_pay_statistics():
 
 
 @inter.route("/order_statistics", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def order_statistics():
     start_time = request.args.get('start_time', '')
     end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -251,7 +251,7 @@ def order_statistics():
 
 
 @inter.route("/order_num_statistics", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def order_num_statistics():
     start_time = request.args.get('start_time', '')
     end_time = request.args.get('end_time', time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -261,7 +261,7 @@ def order_num_statistics():
 
 
 @inter.route("/order_print", methods=['GET'])
-# @admin_login_req
+@admin_login_req
 def order_print():
     order_id = str(request.args.get('order_id', ''))
     if not order_id:

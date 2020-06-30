@@ -8,6 +8,8 @@
         <form class="layui-form layui-col-md12 x-so" method="post">
             {{form.name}}
             {{form.order_no}}
+            {{form.start_time}}
+            {{form.end_time}}
             {{form.csrf_token}}
             {{form.submit}}
             <button class="layui-btn" type="button" onclick="goBack();">重置</button>
@@ -53,5 +55,15 @@
     {{pg.page(page_data,'admin.order')}}
 
 </div>
+<script>
+    $(function ($) {
+        layui.use('laydate', function () {
+            console.log(">>>>>>>>>>>>>>>>>>");
+            const laydate = layui.laydate;
+            laydate.render({elem: '#start_time'});
+            laydate.render({elem: '#end_time'});
+        })
+})
+</script>
 
 {% endblock %}

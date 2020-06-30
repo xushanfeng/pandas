@@ -55,7 +55,6 @@ def login():
             return render_template("admin/login.html", form=form)
         session["admin"] = data['account']
         session["admin_id"] = user.user_id
-        flash("登录成功")
         return redirect(request.args.get("next") or url_for("admin.index"))
     return render_template("admin/login.html", form=form)
 
