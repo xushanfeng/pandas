@@ -109,11 +109,10 @@ $(function () {
     //左侧菜单效果
     // $('#content').bind("click",function(event){
     $('.left-nav #nav li').click(function (event) {
-
         if($(this).children('.sub-menu').length){
             if($(this).hasClass('open')){
                 $(this).removeClass('open');
-                $(this).find('.nav_right').html('&#xe697;');
+                $(this).find('.nav_right').html('&#xe6a7;');
                 $(this).children('.sub-menu').stop().slideUp();
                 $(this).siblings().children('.sub-menu').slideUp();
             }else{
@@ -121,11 +120,10 @@ $(function () {
                 $(this).children('a').find('.nav_right').html('&#xe6a6;');
                 $(this).children('.sub-menu').stop().slideDown();
                 $(this).siblings().children('.sub-menu').stop().slideUp();
-                $(this).siblings().find('.nav_right').html('&#xe697;');
+                $(this).siblings().find('.nav_right').html('&#xe6a7;');
                 $(this).siblings().removeClass('open');
             }
         }else{
-
             var url = $(this).children('a').attr('_href');
             var title = $(this).find('cite').html();
             var index  = $('.left-nav #nav li').index($(this));
@@ -137,19 +135,17 @@ $(function () {
                     return;
                 }
             };
-            
+
             tab.tabAdd(title,url,index+1);
             tab.tabChange(index+1);
         }
-        
+
         event.stopPropagation();
-         
-    })
-    
-})
+    });
+});
 var cateIds = [];
 function getCateId(cateId) {
-    
+
     $("tbody tr[fid="+cateId+"]").each(function(index, el) {
         id = $(el).attr('cate-id');
         cateIds.push(id);
@@ -199,10 +195,10 @@ function x_admin_close(){
 }
 
 function mesg(message) {
-    layer.msg(message || '添加成功!', {icon: 1, time: 3000});
+    layer.msg(message || '添加成功!', {icon: 1, time: 1000});
     setTimeout(function () {
         x_admin_close();
-    }, 2000);
+    }, 4000);
 }
 
 function showMessage(message) {
@@ -226,12 +222,11 @@ function getParams(query) {
 }
 
 function goBack() {
-    window.history.back(-1);
+    x_admin_close();
 }
 
 function renderForm() {
     layui.use('form', function() {
         layui.form.render();
     });
-
 }
