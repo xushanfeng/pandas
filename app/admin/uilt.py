@@ -1,17 +1,8 @@
-# -*- coding:utf-8 -*-
-# author:Agam
-# datetime:2018-11-05
-
 
 import datetime
 import random
 import string
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
-from pyecharts import Bar, Line, Pie
-from pyecharts_javascripthon.api import TRANSLATOR
-from sqlalchemy import extract, func
-from app.apps import db
-# from app.models import Purchase, sales, warehouse, goods
 
 
 def rndColor():

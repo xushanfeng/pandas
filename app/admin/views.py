@@ -99,14 +99,15 @@ def add_guest():
             names = Guest.query.filter_by(user_name=data['name']).count()
             if names == 1:
                 flash('添加失败')
-                return redirect(url_for("admin.guests"))
+                return render_template("admin/add_guest.html", form=form)
             ses = ['', '男', '女']
             guest = Guest(
                 user_name=data['name'],
                 user_sex=ses[data['sex']],
                 user_phone=data['phone'],
                 user_mail=data['email'],
-                addr=data['addr']
+                addr=data['addr'],
+                status=1
             )
             db.session.add(guest)
             db.session.commit()
