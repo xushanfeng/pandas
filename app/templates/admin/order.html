@@ -55,10 +55,10 @@
     {{pg.page(page_data,'admin.order')}}
 
 </div>
+    <script src="{{url_for('static',filename='lib/layui/layui.js')}}" charset="utf-8"></script>
 <script>
     $(function ($) {
         layui.use('laydate', function () {
-            console.log(">>>>>>>>>>>>>>>>>>");
             const laydate = layui.laydate;
             laydate.render({elem: '#start_time'});
             laydate.render({elem: '#end_time'});

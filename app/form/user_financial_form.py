@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, DateTimeField
 
 
 class FinancialSearch(FlaskForm):
@@ -22,6 +22,27 @@ class FinancialSearch(FlaskForm):
             "class": "layui-input"
         }
     )
+
+    start_time = DateTimeField('开始时间',
+                               format='%Y-%m-%d',
+                               render_kw={
+                                   "type": "text",
+                                   "autocomplete": "off",
+                                   "class": "layui-input",
+                                   "id": "start_time",
+                                   "placeholder": "开始时间"
+                               }
+                               )
+    end_time = DateTimeField('结束时间',
+                             format='%Y-%m-%d',
+                             render_kw={
+                                 "type": "text",
+                                 "autocomplete": "off",
+                                 "class": "layui-input",
+                                 "id": "end_time",
+                                 "placeholder": "结束时间"
+                             }
+                             )
 
     submit = SubmitField(
         "搜索",

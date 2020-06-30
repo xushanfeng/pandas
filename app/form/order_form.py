@@ -201,27 +201,6 @@ class OrderSearch(FlaskForm):
         }
     )
 
-    start_time = DateTimeField('开始时间',
-                               render_kw={
-                                   "type": "text",
-                                   "autocomplete": "off",
-                                   "class": "layui-input",
-                                   "lay-key": "1",
-                                   "id": "start_time",
-                                   "placeholder": "开始时间"
-                               }
-                               )
-    end_time = DateTimeField('结束时间',
-                             render_kw={
-                                 "type": "text",
-                                 "autocomplete": "off",
-                                 "class": "layui-input",
-                                 "lay-key": "1",
-                                 "id": "end_time",
-                                 "placeholder": "结束时间"
-                             }
-                             )
-
     name = StringField(
         description="客户姓名",
         render_kw={
@@ -231,6 +210,26 @@ class OrderSearch(FlaskForm):
             "class": "layui-input"
         }
     )
+    start_time = DateTimeField('开始时间',
+                               format='%Y-%m-%d',
+                               render_kw={
+                                   "type": "text",
+                                   "autocomplete": "off",
+                                   "class": "layui-input",
+                                   "id": "start_time",
+                                   "placeholder": "开始时间"
+                               }
+                               )
+    end_time = DateTimeField('结束时间',
+                             format='%Y-%m-%d',
+                             render_kw={
+                                 "type": "text",
+                                 "autocomplete": "off",
+                                 "class": "layui-input",
+                                 "id": "end_time",
+                                 "placeholder": "结束时间"
+                             }
+                             )
 
     submit = SubmitField(
         "搜索",

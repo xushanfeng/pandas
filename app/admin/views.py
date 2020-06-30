@@ -288,12 +288,18 @@ def order(page=None):
     page = page if page is not None else 1
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
     order_no = str(form.data.get('order_no')).strip() if form.data.get('order_no') else None
+    start_time = str(form.data.get('start_time')).strip() if form.data.get('start_time') else None
+    end_time = str(form.data.get('end_time')).strip() if form.data.get('end_time') else None
     order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,Order.description, Guest.user_name) \
         .join(Guest, Guest.user_id == Order.guest_id)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
     if order_no:
         order_query = order_query.filter(Order.order_no.like('%{}%'.format(order_no)))
+    if start_time:
+        order_query = order_query.filter(Order.add_time >= start_time)
+    if end_time:
+        order_query = order_query.filter(Order.add_time <= end_time[:11] + "23:59:59")
     page_data = order_query.order_by(Order.id.desc()).paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/order.html", form=form, page_data=page_data)
 
@@ -446,10 +452,16 @@ def user_financial(page=None):
                                                                                   Guest.user_id == Order.guest_id)
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
     phone = str(form.data.get('phone')).strip() if form.data.get('phone') else None
+    start_time = str(form.data.get('start_time')).strip() if form.data.get('start_time') else None
+    end_time = str(form.data.get('end_time')).strip() if form.data.get('end_time') else None
     if name:
         financial_query = financial_query.filter(Guest.user_name.like('%{}%'.format(name)))
     if form.data.get('phone'):
         financial_query = financial_query.filter(Guest.user_phone.like('%{}%'.format(phone)))
+    if start_time:
+        financial_query = financial_query.filter(Order.add_time >= start_time)
+    if end_time:
+        financial_query = financial_query.filter(Order.add_time <= end_time[:11] + "23:59:59")
     financial_query = financial_query.group_by(Guest.user_id).order_by(sqlalchemy.desc('total'))
     page_data = financial_query.paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/user_financial.html", form=form, page_data=page_data)

@@ -8,6 +8,8 @@
         <form class="layui-form layui-col-md12 x-so" method="post">
             {{form.name}}
             {{form.phone}}
+            {{form.start_time}}
+            {{form.end_time}}
             {{form.csrf_token}}
             {{form.submit}}
         </form>
@@ -38,5 +40,14 @@
     {{pg.page(page_data,'admin.user_financial')}}
 
 </div>
+<script>
+    $(function ($) {
+        layui.use('laydate', function () {
+            const laydate = layui.laydate;
+            laydate.render({elem: '#start_time'});
+            laydate.render({elem: '#end_time'});
+        })
+})
+</script>
 
 {% endblock %}
