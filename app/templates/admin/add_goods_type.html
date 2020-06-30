@@ -6,9 +6,10 @@
 <div class="x-body">
     <form class="layui-form" action="" method="post">
         <div class="layui-form-item">
-            <label class="layui-form-label">类型名称</label>
+            <label class="layui-form-label"><span style="color: red">*</span>类型名称</label>
             <div class="layui-input-block">
                 {{form.name}}
+                <p style="color: red">{{form.name.errors.0}}</p>
             </div>
         </div>
 

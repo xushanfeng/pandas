@@ -624,3 +624,7 @@ table th, table td {
     }
 }
 
+.require-filed {
+    color: red;
+}
+

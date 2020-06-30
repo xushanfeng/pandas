@@ -6,16 +6,18 @@
 <div class="x-body">
     <form class="layui-form" action="" method="post">
         <div class="layui-form-item">
-            <label class="layui-form-label">客户名称</label>
+            <label class="layui-form-label"><span style="color: red">*</span>客户名称</label>
             <div class="layui-input-block">
                 {{form.name}}
+                <p style="color: red">{{form.name.errors.0}}</p>
             </div>
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label">客户手机号</label>
+            <label class="layui-form-label"><span style="color: red">*</span>客户手机号</label>
             <div class="layui-input-block">
                 {{form.phone}}
+                <p style="color: red">{{form.phone.errors.0}}</p>
             </div>
         </div>
         <div class="layui-form-item">
@@ -42,6 +44,10 @@
     </form>
 </div>
 <script>
+    const toast_msg = '{{ msg }}';
+    if (toast_msg !== ''){
+        errmsg(toast_msg)
+    }
 
 </script>
 {% endblock %}

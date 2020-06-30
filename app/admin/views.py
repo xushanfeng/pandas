@@ -6,6 +6,7 @@ from io import BytesIO
 import sqlalchemy
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash
+from wtforms import ValidationError
 
 from app.admin.forms import Login, ResetPassword, GuestForm, GuestSearch, GoodsTypeSearch, GoodsTypeForm, \
     TypeItemSearch, TypeItemForm, OrderSearch, FinancialSearch
@@ -99,7 +100,7 @@ def add_guest():
             names = Guest.query.filter_by(user_name=data['name']).count()
             if names == 1:
                 flash('添加失败')
-                return render_template("admin/add_guest.html", form=form)
+                return render_template("admin/add_guest.html", form=form, msg='姓名重复')
             ses = ['', '男', '女']
             guest = Guest(
                 user_name=data['name'],
@@ -164,12 +165,11 @@ def add_goods_type():
     edit = request.args.get('edit')
     form = GoodsTypeForm()
     if not edit:
-        if form.validate_on_submit():
+        if form.validate():
             data = form.data
             names = GoodsType.query.filter_by(name=data['name'], status=1).count()
             if names == 1:
-                flash('添加失败')
-                return redirect(url_for("admin.add_goods_type"))
+                raise ValidationError("商品类型存在")
             goods_type = GoodsType(
                 name=data['name'],
                 description=data['description'],
@@ -188,18 +188,17 @@ def add_goods_type():
                              description=types.description)
         return render_template("admin/add_goods_type.html", form=form)
     elif request.method.lower() == 'post' and edit:
-        if form.validate_on_submit():
-            data = form.data
-            goods_type = GoodsType.query.filter_by(name=data['name']).first()
-            if goods_type and str(goods_type.id) != str(type_id):
-                flash('编辑失败')
-                return redirect(url_for("admin.add_goods_type"))
-            db.session.query(GoodsType).filter(GoodsType.id == type_id) \
-                .update({GoodsType.name: data['name'],
-                         GoodsType.description: data['description']})
-            db.session.commit()
-            flash("编辑类型")
-            return CLOSE_WIN
+        data = form.data
+        goods_type = GoodsType.query.filter_by(name=data['name']).first()
+        if goods_type and str(goods_type.id) != str(type_id):
+            flash('编辑失败')
+            raise ValidationError("商品类型存在")
+        db.session.query(GoodsType).filter(GoodsType.id == type_id) \
+            .update({GoodsType.name: data['name'],
+                     GoodsType.description: data['description']})
+        db.session.commit()
+        flash("编辑类型")
+        return CLOSE_WIN
     return render_template("admin/add_goods_type.html", form=form)
 
 
@@ -235,7 +234,7 @@ def add_type_item():
             names = TypeItem.query.filter_by(item_name=data['name'], status=1).count()
             if names == 1:
                 flash('添加失败')
-                return redirect(url_for("admin.add_type_item"))
+                raise ValidationError("商品规格存在")
             item = TypeItem(
                 item_name=data['name'],
                 goods_type_id=data['type_name'],
@@ -263,7 +262,7 @@ def add_type_item():
             item = TypeItem.query.filter_by(item_name=data['name'], status=1).first()
             if item and str(item.id) != str(item_id):
                 flash('编辑失败')
-                return redirect(url_for("admin.add_goods_type"))
+                raise ValidationError("商品规格存在")
             db.session.query(TypeItem).filter(TypeItem.id == item_id) \
                 .update({TypeItem.item_name: data['name'],
                          TypeItem.goods_type_id: data['type_name'],

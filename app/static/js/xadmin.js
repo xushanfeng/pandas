@@ -201,6 +201,11 @@ function mesg(message) {
     }, 4000);
 }
 
+function errmsg(message) {
+    layer.msg(message || '保存失败', {icon: 1, time: 1000});
+}
+
+
 function showMessage(message) {
     layui.use('layer', function() {
         layer.msg(message || '添加成功!', {icon: 1, time: 3000});
