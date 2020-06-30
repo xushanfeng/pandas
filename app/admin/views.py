@@ -6,10 +6,14 @@ from io import BytesIO
 import sqlalchemy
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash
-from wtforms import ValidationError
 
-from app.admin.forms import Login, ResetPassword, GuestForm, GuestSearch, GoodsTypeSearch, GoodsTypeForm, \
-    TypeItemSearch, TypeItemForm, OrderSearch, FinancialSearch
+from app.form.goods_type_form import GoodsTypeSearch, GoodsTypeForm
+from app.form.guest_from import GuestForm, GuestSearch
+from app.form.login_form import Login
+from app.form.order_form import OrderSearch
+from app.form.reset_form import ResetPassword
+from app.form.type_item_form import TypeItemSearch, TypeItemForm
+from app.form.user_financial_form import FinancialSearch
 from app.apps import db
 from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
@@ -43,15 +47,15 @@ def login():
         user = User.query.filter_by(user_count=data['account']).first()
         if user is None:
             flash("账号错误")
-            return redirect(url_for("admin.login"))
+            form.pwd.errors.append("账号错误")
+            return render_template("admin/login.html", form=form)
         if not user.check_pwd(data['pwd']):
             flash("密码错误")
-            return redirect(url_for("admin.login"))
-        if session.get('image').lower() != form.verify_code.data.lower():
-            flash('Wrong verify code.')
-            return redirect(url_for("admin.login"))
+            form.pwd.errors.append("密码错误")
+            return render_template("admin/login.html", form=form)
         session["admin"] = data['account']
         session["admin_id"] = user.user_id
+        flash("登录成功")
         return redirect(request.args.get("next") or url_for("admin.index"))
     return render_template("admin/login.html", form=form)
 
@@ -100,6 +104,7 @@ def add_guest():
             names = Guest.query.filter_by(user_name=data['name']).count()
             if names == 1:
                 flash('添加失败')
+                form.name.errors.append('姓名重复')
                 return render_template("admin/add_guest.html", form=form, msg='姓名重复')
             ses = ['', '男', '女']
             guest = Guest(
@@ -112,7 +117,7 @@ def add_guest():
             )
             db.session.add(guest)
             db.session.commit()
-            flash("添加客户")
+            flash("添加成功")
             return CLOSE_WIN
     elif request.method.lower() == "get" and edit:
         user = Guest.query.filter_by(user_id=user_id).first()
@@ -128,8 +133,8 @@ def add_guest():
             data = form.data
             check_guest = Guest.query.filter_by(user_name=data['name']).first()
             if check_guest and str(check_guest.user_id) != str(user_id):
-                flash('编辑失败')
-                return redirect(url_for("admin.add_guest"))
+                form.name.errors.append('姓名重复')
+                return render_template("admin/add_guest.html", form=form, msg='姓名重复')
             ses = ['', '男', '女']
             db.session.query(Guest).filter(Guest.user_id == user_id) \
                 .update({Guest.user_name: data['name'],
@@ -138,7 +143,7 @@ def add_guest():
                          Guest.addr: data['addr'],
                          Guest.user_mail: data['email']})
             db.session.commit()
-            flash("编辑客户")
+            flash("修改成功")
             return CLOSE_WIN
     return render_template("admin/add_guest.html", form=form)
 
@@ -169,7 +174,8 @@ def add_goods_type():
             data = form.data
             names = GoodsType.query.filter_by(name=data['name'], status=1).count()
             if names == 1:
-                raise ValidationError("商品类型存在")
+                form.name.errors.append('商品名称重复')
+                return render_template("admin/add_goods_type.html", form=form)
             goods_type = GoodsType(
                 name=data['name'],
                 description=data['description'],
@@ -177,7 +183,7 @@ def add_goods_type():
             )
             db.session.add(goods_type)
             db.session.commit()
-            flash("添加大类")
+            flash("添加成功")
             return CLOSE_WIN
     elif request.method.lower() == 'get' and edit:
         types = GoodsType.query.filter(GoodsType.id == type_id).first()
@@ -191,13 +197,13 @@ def add_goods_type():
         data = form.data
         goods_type = GoodsType.query.filter_by(name=data['name']).first()
         if goods_type and str(goods_type.id) != str(type_id):
-            flash('编辑失败')
-            raise ValidationError("商品类型存在")
+            form.name.errors.append('商品名称重复')
+            return render_template("admin/add_goods_type.html", form=form)
         db.session.query(GoodsType).filter(GoodsType.id == type_id) \
             .update({GoodsType.name: data['name'],
                      GoodsType.description: data['description']})
         db.session.commit()
-        flash("编辑类型")
+        flash("修改成功")
         return CLOSE_WIN
     return render_template("admin/add_goods_type.html", form=form)
 
@@ -234,7 +240,8 @@ def add_type_item():
             names = TypeItem.query.filter_by(item_name=data['name'], status=1).count()
             if names == 1:
                 flash('添加失败')
-                raise ValidationError("商品规格存在")
+                form.name.errors.append('商品规格重复')
+                return render_template("admin/add_type_item.html", form=form)
             item = TypeItem(
                 item_name=data['name'],
                 goods_type_id=data['type_name'],
@@ -244,7 +251,7 @@ def add_type_item():
             )
             db.session.add(item)
             db.session.commit()
-            flash("添加小类")
+            flash("添加成功")
             return CLOSE_WIN
     elif request.method.lower() == 'get' and edit:
         items = TypeItem.query.filter(TypeItem.id == item_id).first()
@@ -261,15 +268,15 @@ def add_type_item():
             data = form.data
             item = TypeItem.query.filter_by(item_name=data['name'], status=1).first()
             if item and str(item.id) != str(item_id):
-                flash('编辑失败')
-                raise ValidationError("商品规格存在")
+                form.name.errors.append('商品规格重复')
+                return render_template("admin/add_type_item.html", form=form)
             db.session.query(TypeItem).filter(TypeItem.id == item_id) \
                 .update({TypeItem.item_name: data['name'],
                          TypeItem.goods_type_id: data['type_name'],
                          TypeItem.unit: data['unit'],
                          TypeItem.description: data['description']})
             db.session.commit()
-            flash("编辑类型")
+            flash("修改成功")
             return CLOSE_WIN
     return render_template("admin/add_type_item.html", form=form)
 
@@ -360,7 +367,6 @@ def person_detail():
             db.session.flush()
         session.pop('admin', None)
         return 'Success'
-
     return render_template("admin/person_detail.html", form=form, usermessage=usermessage)
 
 

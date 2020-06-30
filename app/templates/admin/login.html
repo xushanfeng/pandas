@@ -28,12 +28,6 @@
         <hr class="hr15">
         {{form.pwd}}
         <hr class="hr15">
-        {{form.verify_code}}
-        <!--点击图片重获验证码-->
-        <img class="verify_code" src="{{url_for('admin.code')}}" onclick="this.src='/admin/code?'+ Math.random()">
-
-
-        <hr class="hr15">
 
         <div class="layui-btn-container">
             {{form.csrf_token}}

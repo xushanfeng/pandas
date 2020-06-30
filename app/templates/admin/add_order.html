@@ -290,7 +290,7 @@ function getOrder() {
                 order = res.data.order || order;
                 initOrder(order);
             } else {
-                showMesssage(res.message || '获取订单信息失败');
+                showMessage(res.message || '获取订单信息失败');
             }
         });
     }
@@ -380,9 +380,10 @@ $('#submit').on('click', function(e) {
         processData : false,
         success: function(res) {
             if (res.result_code !== 'success') {
-                showMesssage(res.message || '保存失败');
+                showMessage(res.message || '保存失败');
+                goBack()
             } else {
-                showMesssage(res.message || '保存成功');
+                showMessage(res.message || '保存成功');
 		    }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
