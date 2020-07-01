@@ -38,8 +38,15 @@ table {width: 100%; text-align: center;}
                 <td width="200" class="order_no left-align"></td>
                 <td width="80">客户:</td>
                 <td class="guest_name left-align"></td>
+                <td width="40">顶板</td>
+                <td width="40">块数:</td>
+                <td width="80" class="proof_block"></td>
+                <td width="40">米数:</td>
+                <td width="80" class="proof_length"></td>
+                <!--
                 <td width="80">审核状况:</td>
                 <td width="100" class="check"></td>
+                -->
             </tr>
             <tr>
                 <td>出货状况:</td>
@@ -48,8 +55,15 @@ table {width: 100%; text-align: center;}
                 <td class="guest_phone left-align"></td>
                 <td>收款金额:</td>
                 <td class="amount_receivable left-align"></td>
+                <td>墙板</td>
+                <td>块数:</td>
+                <td class="wall_block"></td>
+                <td>米数:</td>
+                <td class="wall_length"></td>
+                <!--
                 <td>折扣金额:</td>
                 <td class="discount_amount"></td>
+                -->
             </tr>
         </table>
         <table id="order_detail">
@@ -93,7 +107,21 @@ $(function($){
         $('.guest_phone').html(order.guest_phone);
         $('.out_status').html(order.out_status);
         $('.order_no').html(order.order_no);
-        $('.discount_amount').html(order.discount_amount);
+        
+        var statis_info = order.statis_info || [];
+        var proof_state = statis_info.find(function(item) {
+            return item.name == '顶板';
+        });
+
+        $('.proof_block').html(proof_state.total_block || '');
+        $('.proof_length').html(proof_state.total_length || '');
+        var wall_state = statis_info.find(function(item) {
+            return item.name == '墙板';
+        });
+        $('.wall_block').html(wall_state.total_block || '');
+        $('.wall_length').html(wall_state.total_length || '');
+        //$('.discount_amount').html(order.discount_amount);
+        //$('.check').html(order.check);
         $('.amount_receivable').html(order.amount_receivable);
         $.each(order.details, function(i,item) {
             var $tr = $('<tr>');
