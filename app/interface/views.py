@@ -4,6 +4,7 @@ import time
 import traceback
 
 from flask import request, jsonify, Response
+from sqlalchemy import func
 
 from app.apps import db
 from app.data_template.data_template import print_template
@@ -276,13 +277,23 @@ def order_print():
         .filter(Order.id == order_id).all()
     if not base_info or not base_info[0]:
         return jsonify(base_fail_res("order_id invalid", None))
+    type_query_data = db.session.query(GoodsType.name,
+                                       func.sum(OrderDetail.num).label('total_block'),
+                                       func.sum(OrderDetail.num * OrderDetail.lengh).label('total_length')
+                                       ) \
+        .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
+        .join(TypeItem, TypeItem.id == OrderDetail.item_id) \
+        .join(Order, Order.id == OrderDetail.order_id) \
+        .filter(Order.id == order_id).filter(Order.status == 1) \
+        .filter(OrderDetail.status == 1).filter(TypeItem.unit == 1).group_by(GoodsType.id).all()
+
     print_info = print_template()
+    print_info['statis_info'] = [{'name': i[0], 'total_length': i[1], 'total_block': i[2]} for i in type_query_data]
     print_info['guest_name'] = base_info[0][1].user_name
     print_info['guest_phone'] = base_info[0][1].user_phone
     print_info['order_no'] = base_info[0][0].order_no
     print_info['amount_receivable'] = base_info[0][0].total
     print_info['out_date'] = datetime.datetime.strftime(base_info[0][0].add_time, "%Y/%m/%d")
-
     detail_data = db.session.query(OrderDetail, TypeItem, GoodsType) \
         .join(TypeItem, TypeItem.id == OrderDetail.item_id) \
         .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
