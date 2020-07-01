@@ -259,7 +259,7 @@ function addItem() {
     };
     length && (data.length = length);
     appendItem(data);
-    calTotal();
+    calTotalPrice();
     $('#types').val('');
     $('#type_items').val('');
     $('#price').val('');
@@ -268,13 +268,24 @@ function addItem() {
     $('#length').val('');
     renderForm();
 }
-function calTotal() {
+function calTotalPrice() {
     var total = order.details.map(function(item) {
         return item.unit == 1 ? math.multiply(item.num, item.price, item.length) : math.multiply(item.num, item.price);
     }).reduce(function(prev, next) {
         return prev + next;
     }, 0).toFixed(2);
     $('#total').val(total);
+}
+
+function calTotalLength() {
+    var total = order.details.filter(function(item) {
+        return item.unit == 1;
+    }).map(function(item) {
+        return math.multiply(item.num, item.length);
+    }).reduce(function(prev, next) {
+        return prev + next;
+    }, 0).toFixed(2);
+    return total;
 }
 function getOrder() {
     var params = getParams(location.search.substr(1));
@@ -371,6 +382,11 @@ $('#submit').on('click', function(e) {
         data.id = order.id;
         data.order_no = order.order_no;
     }
+    var total_length = 0;
+    if(order.details.length) {
+        total_length = calTotalLength();
+    }
+    data.total_length = total_length;
     data.details = order.details;
     $.ajax({
         type: 'post',
