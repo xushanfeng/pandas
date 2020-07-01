@@ -25,7 +25,7 @@
             <th>订单总价(元)</th>
             <th>已付款(元)</th>
             <th>未付款(元)</th>
-            <th>总米数</th>
+            <th>总长度(米)</th>
             <th>总块数</th>
             <th>创建时间</th>
             <th>操作</th>
@@ -39,8 +39,18 @@
             <td>{{i.total}}</td>
             <td>{{i.pay}}</td>
             <td>{{i.unpay}}</td>
+            {% if i.total_length <= 0 %}
+            <td>-</td>
+            {% else %}
             <td>{{i.total_length}}</td>
+            {% endif %}
+            {% if i.total_block <= 0 %}
+            <td>-</td>
+            {% else %}
             <td>{{i.total_block}}</td>
+            {% endif %}
+<!--            <td>{{i.total_length}}</td>-->
+<!--            <td>{{i.total_block}}</td>-->
             <td>{{i.order_date}}</td>
 
             <td class="td-manage">

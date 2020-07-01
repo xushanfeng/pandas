@@ -97,35 +97,36 @@ def user_dimension_statistics():
                                        func.sum(Order.unpay).label('total_unpay')).join(Guest,
                                                                                         Order.guest_id == Guest.user_id).filter(Order.status == 1)
     financial_data = financial_query.group_by(Order.guest_id).order_by(sqlalchemy.desc('total_unpay')).first()
-    return {'order_guest_name': orders_data[0],
-            'order_num': orders_data[1],
-            'financial_guest_name': financial_data[0],
-            'financial_unpay': '￥{:0,.2f}'.format(financial_data[1])}
+    return {'order_guest_name': orders_data[0] if orders_data else '-',
+            'order_num': orders_data[1] if orders_data else '-',
+            'financial_guest_name': financial_data[0] if financial_data else '-',
+            'financial_unpay': '￥{:0,.2f}'.format(financial_data[1]) if financial_data else '-'
+            }
 
 
 def order_dimension_statistics():
     # 用户维度统计
-    max_money_orders_data = db.session.query(Order.order_no, Order.total).order_by(Order.total.desc()).first()
+    max_money_orders_data = db.session.query(Order.order_no, Order.total).filter(Order.status == 1).order_by(Order.total.desc()).first()
     most_order_data = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'),
                                        func.count(Order.id).label('num')).filter(Order.status == 1).group_by('order_date').order_by(
         sqlalchemy.desc('num')).first()
-    return {'max_money_order_no': max_money_orders_data[0],
-            'max_money_order_pay': max_money_orders_data[1],
-            'most_order_date': most_order_data[0],
-            'most_order_date_num': most_order_data[1]}
+    return {'max_money_order_no': max_money_orders_data[0] if max_money_orders_data else '-',
+            'max_money_order_pay': max_money_orders_data[1] if max_money_orders_data else '-',
+            'most_order_date': most_order_data[0] if most_order_data else '-',
+            'most_order_date_num': most_order_data[1] if most_order_data else '-'}
 
 
 def string_money_statistics(page_data):
     return {
-        "total": '￥{:0,.2f}'.format(page_data[0][0]),
-        "pay": '￥{:0,.2f}'.format(page_data[0][1]),
-        "un_pay": '￥{:0,.2f}'.format(page_data[0][2])
+        "total": ('￥{:0,.2f}'.format(page_data[0][0])) if page_data[0][0] else '-',
+        "pay": ('￥{:0,.2f}'.format(page_data[0][1])) if page_data[0][1] else '-',
+        "un_pay": '￥{:0,.2f}'.format(page_data[0][2]) if page_data[0][2] else '-'
     }
 
 
 def num_money_statistics(page_data):
     return {
-        "total": round(page_data[0][0], 2),
-        "pay": round(page_data[0][1], 2),
-        "un_pay": round(page_data[0][2], 2)
+        "total": round(page_data[0][0], 2) if page_data[0][0] else '-',
+        "pay": round(page_data[0][1], 2) if page_data[0][1] else '-',
+        "un_pay": round(page_data[0][2], 2) if page_data[0][2] else '-'
     }
