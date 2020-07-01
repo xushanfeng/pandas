@@ -29,6 +29,8 @@ def add_order():
                 total=request_json.get("total"),
                 pay=request_json.get("pay"),
                 unpay=request_json.get("unpay"),
+                total_length=request_json.get("total_length", 0),
+                total_block=request_json.get("total_block", 0),
                 description=request_json.get("description"),
                 operator_id=request_json.get("admin_id"),
                 status=1
@@ -58,7 +60,9 @@ def add_order():
                 Order.total: request_json.get('total'),
                 Order.pay: request_json.get('pay'),
                 Order.unpay: request_json.get('unpay'),
-                Order.description: request_json.get('description')
+                Order.description: request_json.get('description'),
+                Order.total_length: request_json.get('total_length', 0),
+                Order.total_block: request_json.get('total_block', 0)
             })
 
             order_base = db.session.query(Order, Guest) \

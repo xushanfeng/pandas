@@ -19,3 +19,11 @@ CLOSE_WIN = '''
     },3);
 </script>
 '''
+
+REFRESH_PARENT_PAGE = '''
+<script>
+        if(window != top){  
+            window.top.location.href="../login";  
+        };
+        </script>
+'''

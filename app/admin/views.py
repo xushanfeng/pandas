@@ -18,7 +18,7 @@ from app.apps import db
 from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
 from app.admin.uilt import get_verify_code
-from app.constant.const import PAGE_LIMIT, SEX, CLOSE_WIN
+from app.constant.const import PAGE_LIMIT, SEX, CLOSE_WIN, REFRESH_PARENT_PAGE
 from app.models import User, Guest, GoodsType, TypeItem, Order, OrderDetail
 from app.src.compute import home_order_statistics, compute_order_num_statistics, \
     money_statistics, num_money_statistics, string_money_statistics, user_dimension_statistics, \
@@ -100,14 +100,14 @@ def add_guest():
     if not edit:
         if form.validate_on_submit():
             data = form.data
-            names = Guest.query.filter_by(user_name=data['name']).count()
+            names = Guest.query.filter_by(user_name=data['name'], status=1).count()
             if names == 1:
                 flash('添加失败')
                 form.name.errors.append('姓名重复')
                 return render_template("admin/add_guest.html", form=form, msg='姓名重复')
             ses = ['', '男', '女']
             guest = Guest(
-                user_name=data['name'],
+                user_name=str(data['name']).strip(),
                 user_sex=ses[data['sex']],
                 user_phone=data['phone'],
                 user_mail=data['email'],
@@ -130,13 +130,13 @@ def add_guest():
     elif request.method.lower() == "post" and edit:
         if form.validate_on_submit():
             data = form.data
-            check_guest = Guest.query.filter_by(user_name=data['name']).first()
+            check_guest = Guest.query.filter_by(user_name=data['name'], status=1).first()
             if check_guest and str(check_guest.user_id) != str(user_id):
                 form.name.errors.append('姓名重复')
                 return render_template("admin/add_guest.html", form=form, msg='姓名重复')
             ses = ['', '男', '女']
             db.session.query(Guest).filter(Guest.user_id == user_id) \
-                .update({Guest.user_name: data['name'],
+                .update({Guest.user_name: str(data['name']).strip(),
                          Guest.user_sex: ses[data['sex']],
                          Guest.user_phone: data['phone'],
                          Guest.addr: data['addr'],
@@ -176,7 +176,7 @@ def add_goods_type():
                 form.name.errors.append('商品名称重复')
                 return render_template("admin/add_goods_type.html", form=form)
             goods_type = GoodsType(
-                name=data['name'],
+                name=str(data['name']).strip(),
                 description=data['description'],
                 status=1,
             )
@@ -194,12 +194,12 @@ def add_goods_type():
         return render_template("admin/add_goods_type.html", form=form)
     elif request.method.lower() == 'post' and edit:
         data = form.data
-        goods_type = GoodsType.query.filter_by(name=data['name']).first()
+        goods_type = GoodsType.query.filter_by(name=data['name'], status=1).first()
         if goods_type and str(goods_type.id) != str(type_id):
             form.name.errors.append('商品名称重复')
             return render_template("admin/add_goods_type.html", form=form)
         db.session.query(GoodsType).filter(GoodsType.id == type_id) \
-            .update({GoodsType.name: data['name'],
+            .update({GoodsType.name: str(data['name']).strip(),
                      GoodsType.description: data['description']})
         db.session.commit()
         flash("修改成功")
@@ -243,7 +243,7 @@ def add_type_item():
                 form.name.errors.append('商品规格重复')
                 return render_template("admin/add_type_item.html", form=form)
             item = TypeItem(
-                item_name=data['name'],
+                item_name=str(data['name']).strip(),
                 goods_type_id=data['type_name'],
                 unit=data['unit'],
                 description=data['description'],
@@ -271,7 +271,7 @@ def add_type_item():
                 form.name.errors.append('商品规格重复')
                 return render_template("admin/add_type_item.html", form=form)
             db.session.query(TypeItem).filter(TypeItem.id == item_id) \
-                .update({TypeItem.item_name: data['name'],
+                .update({TypeItem.item_name: str(data['name']).strip(),
                          TypeItem.goods_type_id: data['type_name'],
                          TypeItem.unit: data['unit'],
                          TypeItem.description: data['description']})
@@ -292,7 +292,8 @@ def order(page=None):
     start_time = str(form.data.get('start_time')).strip() if form.data.get('start_time') else None
     end_time = str(form.data.get('end_time')).strip() if form.data.get('end_time') else None
     order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Order.description,
-                                   Guest.user_name) \
+                                   Order.total_length, Order.total_block,
+                                   Guest.user_name, func.date_format(Order.add_time, '%Y-%m-%d').label('order_date')) \
         .join(Guest, Guest.user_id == Order.guest_id).filter(Order.status == 1)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
@@ -365,7 +366,7 @@ def person_detail():
     if form.validate_on_submit():
         if not admin.check_pwd(form.data['account']):
             flash('旧密码错误，请联系管理员修改')
-            return render_template("admin/person_detail.html", form=form, usermessage=usermessage)
+            return redirect("admin/person_detail.html", form=form, usermessage=usermessage)
         admin.user_pwd = generate_password_hash((form.data['pwd']))
         try:
             db.session.commit()
@@ -373,7 +374,8 @@ def person_detail():
             db.session.rollback()
             db.session.flush()
         session.pop('admin', None)
-        return 'Success'
+        flash('修改成功')
+        return REFRESH_PARENT_PAGE
     return render_template("admin/person_detail.html", form=form, usermessage=usermessage)
 
 

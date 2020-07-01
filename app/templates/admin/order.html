@@ -25,7 +25,9 @@
             <th>订单总价(元)</th>
             <th>已付款(元)</th>
             <th>未付款(元)</th>
-            <th>备注</th>
+            <th>总米数</th>
+            <th>总块数</th>
+            <th>创建时间</th>
             <th>操作</th>
         </tr>
         </thead>
@@ -37,7 +39,9 @@
             <td>{{i.total}}</td>
             <td>{{i.pay}}</td>
             <td>{{i.unpay}}</td>
-            <td>{{i.description}}</td>
+            <td>{{i.total_length}}</td>
+            <td>{{i.total_block}}</td>
+            <td>{{i.order_date}}</td>
 
             <td class="td-manage">
                 <a title="编辑" onclick="x_admin_show('编辑订单','{{url_for("admin.add_order",edit=True, order_no=i.order_no)}}','1150','450')">
