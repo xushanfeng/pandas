@@ -3,7 +3,7 @@ import json
 import time
 import traceback
 
-from flask import request, jsonify
+from flask import request, jsonify, Response
 
 from app.apps import db
 from app.data_template.data_template import print_template
@@ -30,7 +30,8 @@ def add_order():
                 pay=request_json.get("pay"),
                 unpay=request_json.get("unpay"),
                 description=request_json.get("description"),
-                operator_id=request_json.get("admin_id")
+                operator_id=request_json.get("admin_id"),
+                status=1
             )
             db.session.add(order)
             if request_json.get('details'):
@@ -208,7 +209,7 @@ def type_items():
 
 
 @inter.route("/guests", methods=['GET'])
-@admin_login_req
+# @admin_login_req
 def guests():
     guest_id = str(request.args.get('guest_id', ''))
     guest_name = str(request.args.get('guest_name', ''))
@@ -221,9 +222,9 @@ def guests():
     if not page_data:
         return base_success_res({"items": []})
     #  返回的unit为商品规格单位，可以根据单位是不是米来确认是否显示长度的输入框
-    return jsonify(base_success_res(
-        {"items": [{"guest_id": _.user_id, "guest_name": _.user_name} for _ in
-                   page_data]}))
+    return Response(json.dumps(base_success_res({"items":
+                                                     [{"guest_id": _.user_id, "guest_name": _.user_name} for _ in
+                                                      page_data][:-1]})), mimetype='application/json')
 
 
 @inter.route("/user_pay_statistics", methods=['GET'])

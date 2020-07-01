@@ -46,6 +46,9 @@
                 <a title="打印" onclick="x_admin_show('打印订单','{{url_for("admin.order_print",order_id=i.id)}}','1150','450')">
                     <i class="layui-icon">&#xe66d;</i>
                 </a>
+                <a title="删除" onclick="member_del(this,'{{i.id}}')" href="javascript:;">
+                    <i class="layui-icon">&#xe640;</i>
+                </a>
             </td>
         </tr>
         {% endfor %}
@@ -63,7 +66,22 @@
             laydate.render({elem: '#start_time'});
             laydate.render({elem: '#end_time'});
         })
-})
+});
+
+    function member_del(obj, id) {
+        console.log(id);
+        layer.confirm('确认要删除吗？', function (index) {
+            //发异步删除数据
+            $.get(
+                '/admin/del_order?id=' + id,
+                function (html) {
+                    location.reload();
+                }
+            );
+            $(obj).parents("tr").remove();
+            layer.msg('已删除!', {icon: 1, time: 1000});
+        });
+    }
 </script>
 
 {% endblock %}

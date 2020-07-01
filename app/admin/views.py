@@ -19,7 +19,7 @@ from app.admin import admin
 from flask import render_template, make_response, session, redirect, url_for, request, flash
 from app.admin.uilt import get_verify_code
 from app.constant.const import PAGE_LIMIT, SEX, CLOSE_WIN
-from app.models import User, Guest, GoodsType, TypeItem, Order
+from app.models import User, Guest, GoodsType, TypeItem, Order, OrderDetail
 from app.src.compute import home_order_statistics, compute_order_num_statistics, \
     money_statistics, num_money_statistics, string_money_statistics, user_dimension_statistics, \
     order_dimension_statistics
@@ -233,6 +233,7 @@ def add_type_item():
     edit = request.args.get('edit')
     item_id = request.args.get('id')
     form = TypeItemForm()
+    form.type_name.choices = [(i.id, i.name) for i in GoodsType.query.filter(GoodsType.status == 1).all()]
     if not edit and not item_id:
         if form.validate_on_submit():
             data = form.data
@@ -290,8 +291,9 @@ def order(page=None):
     order_no = str(form.data.get('order_no')).strip() if form.data.get('order_no') else None
     start_time = str(form.data.get('start_time')).strip() if form.data.get('start_time') else None
     end_time = str(form.data.get('end_time')).strip() if form.data.get('end_time') else None
-    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay,Order.description, Guest.user_name) \
-        .join(Guest, Guest.user_id == Order.guest_id)
+    order_query = db.session.query(Order.id, Order.order_no, Order.total, Order.pay, Order.unpay, Order.description,
+                                   Guest.user_name) \
+        .join(Guest, Guest.user_id == Order.guest_id).filter(Order.status == 1)
     if name:
         order_query = order_query.filter(Guest.user_name.like('%{}%'.format(name)))
     if order_no:
@@ -422,6 +424,23 @@ def del_type_item():
     return "success"
 
 
+# 删除小类
+@admin.route("/del_order/", methods=["GET"])
+@admin_login_req
+def del_order():
+    order_id = request.args.get('id')
+    try:
+        db.session.query(Order).filter(Order.id == order_id).update({Order.status: 2})
+        db.session.query(OrderDetail).filter(OrderDetail.order_id == order_id).update({OrderDetail.status: 2})
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.flush()
+        db.session.close()
+        print("del error, error info:", e)
+    return "success"
+
+
 @admin.route("/order_statistics/")
 @admin_login_req
 def order_statistics():
@@ -462,6 +481,7 @@ def user_financial(page=None):
         financial_query = financial_query.filter(Order.add_time >= start_time)
     if end_time:
         financial_query = financial_query.filter(Order.add_time <= end_time[:11] + "23:59:59")
-    financial_query = financial_query.group_by(Guest.user_id).order_by(sqlalchemy.desc('total'))
+    financial_query = financial_query.filter(Order.status == 1).group_by(Guest.user_id).order_by(
+        sqlalchemy.desc('total'))
     page_data = financial_query.paginate(page=page, per_page=PAGE_LIMIT)
     return render_template("admin/user_financial.html", form=form, page_data=page_data)

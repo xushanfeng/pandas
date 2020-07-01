@@ -49,15 +49,12 @@ class TypeItemSearch(FlaskForm):
 
 # 材质类型
 class TypeItemForm(FlaskForm):
-    id = None
-    good_types = GoodsType.query.filter(GoodsType.status == 1).all()
     type_name = SelectField(
         label="请选择类型",
         validators=[
             DataRequired()
         ],
         coerce=int,
-        choices=[(i.id, i.name) for i in good_types],
         description="请选择类型",
         render_kw={
             "class": "contrller",

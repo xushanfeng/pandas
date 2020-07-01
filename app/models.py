@@ -65,6 +65,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_no = db.Column(db.String(100), unique=True)
     guest_id = db.Column(db.Integer, unique=True)
+    status = db.Column(db.Integer, unique=True)
     pay = db.Column(db.DECIMAL, unique=True)
     unpay = db.Column(db.DECIMAL, unique=True)
     total = db.Column(db.DECIMAL, unique=True)

@@ -381,9 +381,10 @@ $('#submit').on('click', function(e) {
         success: function(res) {
             if (res.result_code !== 'success') {
                 showMessage(res.message || '保存失败');
-                goBack()
+
             } else {
                 showMessage(res.message || '保存成功');
+                goBack()
 		    }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {

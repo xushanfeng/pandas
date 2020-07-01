@@ -57,7 +57,7 @@ def compute_order_statistics(start_time=None, end_time=None):
 def compute_order_num_statistics(start_time=None, end_time=None, days=30):
     end_time = end_time if end_time else time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     order_query = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'),
-                                   func.count(Order.id))
+                                   func.count(Order.id)).filter(Order.status == 1)
     if not start_time:
         base_timestamp = time.mktime(time.strptime(end_time, "%Y-%m-%d %H:%M:%S"))
         start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(base_timestamp - days * 24 * 60 * 60))
@@ -73,10 +73,10 @@ def home_order_statistics():
     this_week_first = today-datetime.timedelta(days=today.weekday())
     this_month_first = datetime.date(today.year, today.month, 1)
     today_order_data = db.session.query(func.count(Order.id)).filter(
-        Order.add_time >= '{} 00:00:00'.format(today)).all()
+        Order.add_time >= '{} 00:00:00'.format(today)).filter(Order.status == 1).all()
     week_order_data = db.session.query(func.count(Order.id)).filter(
-        Order.add_time >= '{} 00:00:00'.format(this_week_first)).all()
-    month_order_data = db.session.query(func.count(Order.id)).filter(
+        Order.add_time >= '{} 00:00:00'.format(this_week_first)).filter(Order.status == 1).all()
+    month_order_data = db.session.query(func.count(Order.id)).filter(Order.status == 1).filter(
         Order.add_time >= '{} 00:00:00'.format(this_month_first)).all()
     return {"current": today_order_data[0][0], "this_week": week_order_data[0][0], "this_month": month_order_data[0][0]}
 
@@ -84,7 +84,7 @@ def home_order_statistics():
 def money_statistics():
     end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     base_query = db.session.query(func.sum(Order.total), func.sum(Order.pay), func.sum(Order.unpay)) \
-        .join(Guest, Order.guest_id == Guest.user_id).filter(Order.add_time < end_time)
+        .join(Guest, Order.guest_id == Guest.user_id).filter(Order.status == 1).filter(Order.add_time < end_time)
     return base_query.order_by(Guest.user_id.desc()).all()
 
 
@@ -92,10 +92,10 @@ def user_dimension_statistics():
     # 用户维度统计
     orders_query = db.session.query(Guest.user_name,
                                     func.count(Order.id).label('num')).join(Guest, Order.guest_id == Guest.user_id)
-    orders_data = orders_query.group_by(Order.guest_id).order_by(sqlalchemy.desc('num')).first()
+    orders_data = orders_query.group_by(Order.guest_id).order_by(sqlalchemy.desc('num')).filter(Order.status == 1).first()
     financial_query = db.session.query(Guest.user_name,
                                        func.sum(Order.unpay).label('total_unpay')).join(Guest,
-                                                                                        Order.guest_id == Guest.user_id)
+                                                                                        Order.guest_id == Guest.user_id).filter(Order.status == 1)
     financial_data = financial_query.group_by(Order.guest_id).order_by(sqlalchemy.desc('total_unpay')).first()
     return {'order_guest_name': orders_data[0],
             'order_num': orders_data[1],
@@ -107,7 +107,7 @@ def order_dimension_statistics():
     # 用户维度统计
     max_money_orders_data = db.session.query(Order.order_no, Order.total).order_by(Order.total.desc()).first()
     most_order_data = db.session.query(func.date_format(Order.add_time, '%Y-%m-%d').label('order_date'),
-                                       func.count(Order.id).label('num')).group_by('order_date').order_by(
+                                       func.count(Order.id).label('num')).filter(Order.status == 1).group_by('order_date').order_by(
         sqlalchemy.desc('num')).first()
     return {'max_money_order_no': max_money_orders_data[0],
             'max_money_order_pay': max_money_orders_data[1],
