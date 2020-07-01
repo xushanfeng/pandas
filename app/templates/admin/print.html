@@ -107,17 +107,17 @@ $(function($){
         $('.guest_phone').html(order.guest_phone);
         $('.out_status').html(order.out_status);
         $('.order_no').html(order.order_no);
-        
+
         var statis_info = order.statis_info || [];
         var proof_state = statis_info.find(function(item) {
             return item.name == '顶板';
-        });
+        }) || [];
 
         $('.proof_block').html(proof_state.total_block || '');
         $('.proof_length').html(proof_state.total_length || '');
         var wall_state = statis_info.find(function(item) {
             return item.name == '墙板';
-        });
+        }) || [];
         $('.wall_block').html(wall_state.total_block || '');
         $('.wall_length').html(wall_state.total_length || '');
         //$('.discount_amount').html(order.discount_amount);
