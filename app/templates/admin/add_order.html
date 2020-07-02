@@ -85,7 +85,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">已付款(元)</label>
             <div class="layui-input-block">
-                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required="" type="text">
+                <input class="layui-input" id="pay" lay-verify="required" name="pay" placeholder="请输入已付款金额" required type="text">
             </div>
         </div>
         <div class="layui-form-item">
@@ -121,7 +121,7 @@ layui.use('form', function() {
     form.on('select(type_item_id)', function(data) {
         var id = $('#type_items').val();
         $('#length').val('');
-        $('#unit').val(config.type_items[id].unit);
+        $('#unit').val(config.type_items[id].unit || '');
         if(config.type_items[id].unit == 1) {
             $('#length').attr('disabled', false);
             $('#length').show();
@@ -178,8 +178,19 @@ var order = {
     description: '',
 };
 
+function randomString(len) {
+ 　　len = len || 32;
+ 　　var $chars = 'abcdefhijkmnprstwxyz';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
+ 　　var maxPos = $chars.length;
+ 　　var pwd = '';
+ 　　for (i = 0; i < len; i++) {
+ 　　　　pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+ 　　}
+ 　　return pwd;
+}
+
 function appendItem(data) {
-    if(data.id) {
+    if(data.id && !isNaN(data.id)) {
         var idx = order.details.findIndex(function(item) {
             return item.id == data.id;
         });
@@ -217,7 +228,7 @@ function initOrder(order) {
 }
 
 function addItem() {
-    var id = $('#id').val() || 0;
+    var id = $('#id').val() || randomString(8);
     var type_id = $('#types').val();
     if(!type_id) {
         showMessage('请选择分类');
@@ -260,6 +271,7 @@ function addItem() {
     length && (data.length = length);
     appendItem(data);
     calTotalPrice();
+    calUnpay();
     $('#types').val('');
     $('#type_items').val('');
     $('#price').val('');
@@ -268,13 +280,34 @@ function addItem() {
     $('#length').val('');
     renderForm();
 }
+
 function calTotalPrice() {
-    var total = order.details.map(function(item) {
+    var details = order.details.filter(function(item) {
+        return item.status != 2;
+    });
+
+    var total = details.map(function(item) {
         return item.unit == 1 ? math.multiply(item.num, item.price, item.length) : math.multiply(item.num, item.price);
     }).reduce(function(prev, next) {
         return prev + next;
     }, 0).toFixed(2);
     $('#total').val(total);
+}
+
+function calUnpay() {
+    var total = $('#total').val();
+    var pay = $('#pay').val();
+    var unpay = 0;
+    if(isNaN(pay)) {
+        showMessage('请填写数字');
+    } else {
+        unpay = math.subtract(total, pay);
+        if(unpay < 0) {
+            showMessage('未付款数额超过总价!');
+            return;
+        }
+    }
+    $('#unpay').val(unpay);
 }
 
 function calTotalLength() {
@@ -283,7 +316,7 @@ function calTotalLength() {
     }).map(function(item) {
         return math.multiply(item.num, item.length);
     }).reduce(function(prev, next) {
-        return prev + next;
+        return prev + Number(next);
     }, 0).toFixed(2);
     return total;
 }
@@ -320,31 +353,26 @@ function getOrder() {
 }
 
 $('#pay').on('input', function(e) {
-    var total = $('#total').val();
-    var pay = $('#pay').val();
-    if(isNaN(pay)) {
-        showMessage('请填写数字');
-        
-    } else {
-        var unpay = math.subtract(total, pay);
-        $('#unpay').val(unpay);
-    }
+    calUnpay(); 
 });
 
 $('#detail').on('click', '.btn-delete', function(e) {
     var $this = $(this);
     var $tr = $this.parent().parent();
     var id = $tr.data('id');
-    if(id) {
-        var idx = order.details.findIndex(function(item) {
-            return item.id == id;
-        });
+    var idx = order.details.findIndex(function(item) {
+        return item.id == id;
+    });
+    if(isNaN(id)) {
+        delete(order.details[idx]);
+    } else {
         var target = order.details[idx];
         target.status = 2;
         order.details[idx] = target;
-    } else {
-
     }
+    
+    calTotalPrice();
+    calUnpay();
     $tr.remove();
 });
 
@@ -401,7 +429,13 @@ $('#submit').on('click', function(e) {
     }
     data.total_length = total_length;
     data.total_block = total_block;
-    data.details = order.details;
+    var details = order.details.map(function(item) {
+        if(isNaN(item.id)) {
+            item.id = 0;
+        }
+        return item;
+    })
+    data.details = details;
     $.ajax({
         type: 'post',
         url: apis.save,
