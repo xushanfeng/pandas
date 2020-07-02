@@ -267,7 +267,7 @@ def order_num_statistics():
 
 
 @inter.route("/order_print", methods=['GET'])
-@admin_login_req
+# @admin_login_req
 def order_print():
     order_id = str(request.args.get('order_id', ''))
     if not order_id:
@@ -288,7 +288,8 @@ def order_print():
         .filter(OrderDetail.status == 1).filter(TypeItem.unit == 1).group_by(GoodsType.id).all()
 
     print_info = print_template()
-    print_info['statis_info'] = [{'name': i[0], 'total_length': i[1], 'total_block': i[2]} for i in type_query_data]
+    print_info['statis_info'] = [{'name': i[0], 'total_length': '{} 米'.format(i[2]), 'total_block': '{} 块'.format(i[1])}
+                                 for i in type_query_data]
     print_info['guest_name'] = base_info[0][1].user_name
     print_info['guest_phone'] = base_info[0][1].user_phone
     print_info['order_no'] = base_info[0][0].order_no

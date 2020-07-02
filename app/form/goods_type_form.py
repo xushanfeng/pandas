@@ -28,12 +28,11 @@ class GoodsTypeForm(FlaskForm):
     name = StringField(
         label='请输入类型名称',
         validators=[
-            DataRequired()
+            DataRequired('请输入类型名称')
         ],
         description="请输入类型名称",
         render_kw={
             "type": "text",
-            "lay-verify": "required",
             "class": "layui-input",
             "placeholder": "请输入类型名称",
             "required": False

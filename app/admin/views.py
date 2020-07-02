@@ -169,7 +169,7 @@ def add_goods_type():
     edit = request.args.get('edit')
     form = GoodsTypeForm()
     if not edit:
-        if form.validate():
+        if form.validate_on_submit():
             data = form.data
             names = GoodsType.query.filter_by(name=data['name'], status=1).count()
             if names == 1:

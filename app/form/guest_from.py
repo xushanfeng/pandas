@@ -1,12 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired, ValidationError
-from app.models import Guest
+from wtforms.validators import DataRequired
 
 
 class GuestForm(FlaskForm):
-    id = None
-    edit = False
     name = StringField(
         label='请输入客户姓名',
         validators=[
@@ -70,12 +67,6 @@ class GuestForm(FlaskForm):
             "lay-filter": "subm",
         }
     )
-    #
-    # def validate_name(self, field):
-    #     name = field.data
-    #     user = Guest.query.filter_by(user_name=name).count()
-    #     if user == 1:
-    #         raise ValidationError("昵称已存在")
 
 
 # 客户管理查询
