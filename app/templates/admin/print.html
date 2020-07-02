@@ -4,7 +4,7 @@
 <script src="{{url_for('static',filename='js/jQuery.print.min.js')}}" charset="utf-8"></script>
 <style>
 .left-align {text-align: left;}
-#print_body {width: 1000px; height: 100%;}
+#print_body {width: 1000px; height: 100%; margin: 40px 0;}
 table {width: 100%; text-align: center;}
 #order_info { border-bottom: 1px solid #000;margin-bottom: 2px;}
 #order_info tr {height: 24px}
@@ -15,7 +15,7 @@ table {width: 100%; text-align: center;}
 
 @page {
     size: A4 portrait;
-    margin: 40px;
+    margin: 0px 40px;
 }
 </style>
 <div style="padding: 10px 0 0 10px"><button class="layui-btn" onclick="print()">打印</button></div>
@@ -142,7 +142,7 @@ function print() {
     $('#print_body').print({
         globalStyles: true,
         mediaPrint: true,
-        iframe: true,
+        iframe: false,
         manuallyCopyFormValues: true,
         timeout: 750,
         title: '',
