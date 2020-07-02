@@ -10,6 +10,11 @@ UNIT = {
     "个": 3
 }
 
+STATIS = {
+    "是": 1,
+    "否": 0
+}
+
 CLOSE_WIN = '''
 <script>
     setTimeout(function(){

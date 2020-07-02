@@ -54,6 +54,7 @@ class TypeItemForm(FlaskForm):
         validators=[
             DataRequired()
         ],
+        choices=[(i.id, i.name) for i in GoodsType.query.filter(GoodsType.status == 1).all()],
         coerce=int,
         description="请选择类型",
         render_kw={
