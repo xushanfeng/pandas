@@ -9,6 +9,7 @@ table {width: 100%; text-align: center;}
 #order_info { border-bottom: 1px solid #000;margin-bottom: 2px;}
 #order_info tr {height: 24px}
 #order_info .subtitle {font-size: 12px;}
+#order_info .connect {font-size: 12px;}
 #order_detail { border: 1px solid #000}
 #order_detail tr td{ border: 1px solid #000}
 #order_detail tbody tr { height: 20px;}
@@ -29,6 +30,9 @@ table {width: 100%; text-align: center;}
             </tr>
             <tr>
                 <td colspan="12" class="subtitle"></td>
+            </tr>
+            <tr>
+                <td colspan="12" class="connect"></td>
             </tr>
             <tr>
                 <td width="80">日期:</td>
@@ -99,8 +103,9 @@ $(function($){
         }
         var order = res.data;
         $('.title').html(order.title);
-        $('.sheet').html(order.sub_title);
-        $('.subtitle').html(order.connect);
+        // $('.sheet').html(order.sub_title);
+        $('.subtitle').html(order.sub_title);
+        $('.connect').html(order.connect);
         $('.out_date').html(order.out_date);
         $('.guest_name').html(order.guest_name);
         $('.guest_phone').html(order.guest_phone);
