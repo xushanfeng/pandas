@@ -294,7 +294,7 @@ function calTotalBlock() {
     }).map(function(item) {
         return item.num;
     }).reduce(function(prev, next) {
-        return prev + next;
+        return prev + parseInt(next);
     }, 0);
     return total;
 }
