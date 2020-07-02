@@ -298,7 +298,7 @@ function calTotalPrice() {
 function calUnpay() {
     var total = $('#total').val();
     var pay = $('#pay').val();
-    var unpay = math.subtract(total, pay);
+    var unpay = math.subtract(total, pay).toFixed(2);
     if(unpay < 0) {
         showMessage('未付款数额超过总价!');
     }
@@ -307,7 +307,7 @@ function calUnpay() {
 
 function calTotalLength() {
     var total = order.details.filter(function(item) {
-        return item.unit == 1;
+        return item.unit == 1 && item.status != 2;
     }).map(function(item) {
         return math.multiply(item.num, item.length);
     }).reduce(function(prev, next) {
@@ -318,7 +318,7 @@ function calTotalLength() {
 
 function calTotalBlock() {
     var total = order.details.filter(function(item) {
-        return item.unit == 1;
+        return item.unit == 1 && item.staus != 2;
     }).map(function(item) {
         return item.num;
     }).reduce(function(prev, next) {
