@@ -279,7 +279,9 @@ def order_print():
         return jsonify(base_fail_res("order_id invalid", None))
     type_query_data = db.session.query(GoodsType.name,
                                        func.sum(OrderDetail.num).label('total_block'),
-                                       func.sum(OrderDetail.num * OrderDetail.lengh).label('total_length')
+                                       func.sum(OrderDetail.num * OrderDetail.lengh).label('total_length'),
+                                       func.sum(OrderDetail.num * OrderDetail.lengh * OrderDetail.price).label(
+                                           'total_type_money')
                                        ) \
         .join(GoodsType, GoodsType.id == OrderDetail.type_id) \
         .join(TypeItem, TypeItem.id == OrderDetail.item_id) \
@@ -288,7 +290,8 @@ def order_print():
         .filter(OrderDetail.status == 1).filter(TypeItem.unit == 1).group_by(GoodsType.id).all()
 
     print_info = print_template()
-    print_info['statis_info'] = [{'name': i[0], 'total_length': '{} 米'.format(i[2]), 'total_block': '{} 块'.format(i[1])}
+    print_info['statis_info'] = [{'name': i[0], 'total_length': '{} 米'.format(i[2]),
+                                  'total_block': '{} 块'.format(i[1]), 'total_type_money': '￥{}'.format(i[3])}
                                  for i in type_query_data]
     print_info['guest_name'] = base_info[0][1].user_name
     print_info['guest_phone'] = base_info[0][1].user_phone
@@ -324,7 +327,7 @@ def order_print():
             detail['item_total'] = "￥{}".format(item_total)
             amount_receivable = amount_receivable + item_total
         details.append(detail)
-    print_info['amount_receivable'] = amount_receivable
+    print_info['amount_receivable'] = '￥{}'.format(amount_receivable)
     print_info['details'] = details
     return jsonify(base_success_res(print_info))
 
