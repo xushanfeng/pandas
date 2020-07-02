@@ -297,15 +297,9 @@ function calTotalPrice() {
 function calUnpay() {
     var total = $('#total').val();
     var pay = $('#pay').val();
-    var unpay = 0;
-    if(isNaN(pay)) {
-        showMessage('请填写数字');
-    } else {
-        unpay = math.subtract(total, pay);
-        if(unpay < 0) {
-            showMessage('未付款数额超过总价!');
-            return;
-        }
+    var unpay = math.subtract(total, pay);
+    if(unpay < 0) {
+        showMessage('未付款数额超过总价!');
     }
     $('#unpay').val(unpay);
 }
@@ -353,6 +347,12 @@ function getOrder() {
 }
 
 $('#pay').on('input', function(e) {
+    var total = $('#total').val();
+    var pay = $('#pay').val();
+    if(isNaN(pay)) {
+        showMessage('请填写数字');
+        return;
+    }
     calUnpay(); 
 });
 
@@ -364,7 +364,7 @@ $('#detail').on('click', '.btn-delete', function(e) {
         return item.id == id;
     });
     if(isNaN(id)) {
-        delete(order.details[idx]);
+        order.details.splice(idx, 1);
     } else {
         var target = order.details[idx];
         target.status = 2;
