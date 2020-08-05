@@ -6,13 +6,15 @@
 .left-align {text-align: left;}
 #print_body {width: 1000px; height: 100%;}
 table {width: 100%; text-align: center;}
-#order_info { border-bottom: 1px solid #000;margin-bottom: 2px;}
-#order_info tr {height: 24px}
-#order_info .subtitle {font-size: 12px;}
-#order_info .connect {font-size: 12px;}
+#order_info { border-bottom: 1px solid #000;margin-bottom: 2px; font-size: 20px}
+#order_info tr {height: 24px; padding-bottom: 5px}
+#order_info .title {font-size: 30px; padding-bottom: 5px}
+#order_info .subtitle {font-size: 20px;}
+#order_info .connect {font-size: 20px; padding-bottom: 5px}
 #order_detail { border: 1px solid #000}
 #order_detail tr td{ border: 1px solid #000}
-#order_detail tbody tr { height: 20px;}
+/*#order_info tbody {padding-bottom: 5px}*/
+#order_detail tbody tr { height: 40px; font-size: 16px}
 
 @page {
     size: A4 portrait;
@@ -35,35 +37,31 @@ table {width: 100%; text-align: center;}
                 <td colspan="12" class="connect"></td>
             </tr>
             <tr>
-                <td width="80">日期:</td>
-                <td width="80" class="out_date"></td>
-                <td width="80">票号:</td>
-                <td width="120" class="order_no left-align"></td>
-                <td width="80">客户:</td>
+<!--                <td width="80">日期:</td>-->
+                <td width="85" class="out_date"></td>
+                <td width="40">票号:</td>
+                <td width="130" class="order_no left-align"></td>
+                <td width="60">客户:</td>
                 <td width="120" class="guest_name left-align"></td>
-                <td width="40">顶板</td>
-                <td width="40">块数:</td>
+                <td width="40">顶板:</td>
+<!--                <td width="40">块数:</td>-->
                 <td width="80" class="proof_block left-align"></td>
-                <td width="40">米数:</td>
+<!--                <td width="40">米数:</td>-->
                 <td width="80" class="proof_length left-align"></td>
                 <td width="40">金额:</td>
-                <td width="80" class="proof_total left-align"></td>
-                <!--
-                <td width="80">审核状况:</td>
-                <td width="100" class="check"></td>
-                -->
+                <td width="100" class="proof_total left-align"></td>
             </tr>
             <tr>
-                <td>出货状况:</td>
+<!--                <td>出货状况:</td>-->
                 <td class="out_status"></td>
-                <td>联系电话:</td>
+                <td>电话:</td>
                 <td class="guest_phone left-align"></td>
                 <td>总金额:</td>
                 <td class="amount_receivable left-align"></td>
-                <td>墙板</td>
-                <td>块数:</td>
+                <td>墙板:</td>
+<!--                <td>块数:</td>-->
                 <td class="wall_block left-align"></td>
-                <td>米数:</td>
+<!--                <td>米数:</td>-->
                 <td class="wall_length left-align"></td>
                 <td width="40">金额:</td>
                 <td width="80" class="wall_total left-align"></td>

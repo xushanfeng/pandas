@@ -467,9 +467,9 @@ def user_financial(page=None):
     form = FinancialSearch()
     page = page if page is not None else 1
     financial_query = db.session.query(Guest.user_name, Guest.user_phone,
-                                       func.round(func.sum(Order.total), 2).label('total'),
-                                       func.sum(Order.pay).label('pay'),
-                                       func.sum(Order.unpay).label('unpay')).join(Guest,
+                                       func.format(func.sum(Order.total), 2).label('total'),
+                                       func.format(func.sum(Order.pay), 2).label('pay'),
+                                       func.format(func.sum(Order.unpay), 2).label('unpay')).join(Guest,
                                                                                   Guest.user_id == Order.guest_id)
     name = str(form.data.get('name')).strip() if form.data.get('name') else None
     phone = str(form.data.get('phone')).strip() if form.data.get('phone') else None

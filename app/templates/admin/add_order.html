@@ -8,8 +8,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label">客户名称</label>
             <div class="layui-input-block">
-                <select id="guest_name" name="guest_name" lay-filter="guest_name" required="">
-                    <option>请选择</option>
+                <select id="guest_name" name="guest_name" lay-filter="guest_name" required="" lay-search >
+                    <option></option>
                     {% for guest in guests %}
                     <option value="{{guest.user_id}}">{{guest.user_name}}</option>
                     {% endfor %}
@@ -40,15 +40,15 @@
                     <tbody>
                         <input type="hidden" id="id"/>
                         <td>
-                            <select id="types" lay-filter="type_id">
-                                <option value="">请选择</options>
+                            <select id="types" lay-filter="type_id" lay-search>
+                                <option value="" >请选择</options>
                                 {% for type in types %}
                                 <option value="{{type.id}}">{{type.name}}</option>
                                 {% endfor %}
                             </select>
                         </td>
                         <td>
-                            <select id="type_items" lay-filter="type_item_id">
+                            <select id="type_items" lay-filter="type_item_id" lay-search>
                                 <option value="">请选择</options>
                                 {% for type in type_items %}
                                 <option data-goods_type_id="{{type.goods_type_id}}" value="{{type.id}}">{{type.item_name}}</option>

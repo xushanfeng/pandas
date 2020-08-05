@@ -27,9 +27,9 @@ def add_order():
             order = Order(
                 order_no=time.strftime("%Y%m%d%H%M%S", time.localtime()),
                 guest_id=request_json.get("guest_id"),
-                total=request_json.get("total"),
-                pay=request_json.get("pay"),
-                unpay=request_json.get("unpay"),
+                total=request_json.get("total", 0),
+                pay=request_json.get("pay") if request_json.get("pay") else 0,
+                unpay=request_json.get("unpay", 0),
                 total_length=request_json.get("total_length", 0),
                 total_block=request_json.get("total_block", 0),
                 description=request_json.get("description"),
@@ -58,9 +58,9 @@ def add_order():
         else:
             db.session.query(Order).filter(Order.id == order_id).update({
                 Order.guest_id: request_json.get('guest_id'),
-                Order.total: request_json.get('total'),
-                Order.pay: request_json.get('pay'),
-                Order.unpay: request_json.get('unpay'),
+                Order.total: request_json.get('total', 0),
+                Order.pay: request_json.get("pay") if request_json.get("pay") else 0,
+                Order.unpay: request_json.get('unpay', 0),
                 Order.description: request_json.get('description'),
                 Order.total_length: request_json.get('total_length', 0),
                 Order.total_block: request_json.get('total_block', 0)
@@ -290,13 +290,13 @@ def order_print():
         .filter(OrderDetail.status == 1).filter(TypeItem.unit == 1).group_by(GoodsType.id).all()
 
     print_info = print_template()
-    print_info['statis_info'] = [{'name': i[0], 'total_length': '{} 米'.format(i[2]),
-                                  'total_block': '{} 块'.format(i[1]), 'total_type_money': '￥{}'.format(i[3])}
+    print_info['statis_info'] = [{'name': i[0], 'total_length': '{} 米'.format(round(i[2], 2)),
+                                  'total_block': '{} 块'.format(i[1]), 'total_type_money': '￥{}'.format(round(i[3], 2))}
                                  for i in type_query_data]
     print_info['guest_name'] = base_info[0][1].user_name
     print_info['guest_phone'] = base_info[0][1].user_phone
     print_info['order_no'] = base_info[0][0].order_no
-    print_info['amount_receivable'] = base_info[0][0].total
+    print_info['amount_receivable'] = round(base_info[0][0].total, 2)
     print_info['out_date'] = datetime.datetime.strftime(base_info[0][0].add_time, "%Y/%m/%d")
     detail_data = db.session.query(OrderDetail, TypeItem, GoodsType) \
         .join(TypeItem, TypeItem.id == OrderDetail.item_id) \
@@ -318,7 +318,7 @@ def order_print():
         detail['price'] = "￥{}".format(price)
         if type_item.unit == '1':
             detail['length'] = order_detail.lengh if order_detail.lengh else 0
-            detail['total_length'] = detail.get('length') * detail.get('num')
+            detail['total_length'] = round(detail.get('length') * detail.get('num'), 2)
             item_total = round(detail.get('length') * num * price, 2)
             detail['item_total'] = "￥{}".format(item_total)
             amount_receivable = amount_receivable + item_total
@@ -327,7 +327,7 @@ def order_print():
             detail['item_total'] = "￥{}".format(item_total)
             amount_receivable = amount_receivable + item_total
         details.append(detail)
-    print_info['amount_receivable'] = '￥{}'.format(amount_receivable)
+    print_info['amount_receivable'] = '￥{}'.format(round(amount_receivable, 2))
     print_info['details'] = details
     return jsonify(base_success_res(print_info))
 
